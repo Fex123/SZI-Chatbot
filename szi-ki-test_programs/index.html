@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar for Conversation History -->
+        <div id="sidebar">
+            <button id="new-chat-button">
+                <i class="material-icons">add</i> Neuer Chat
+            </button>
+            <div id="conversation-list"></div>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="chat-container">
+            <div class="chat-header">Chat</div>
+            <div id="chat-box" class="chat-box"></div>
+            <div class="chat-input">
+                <button id="toggle-sidebar">
+                    <i class="material-icons">menu</i>
+                </button>
+                <input type="text" id="user-input" placeholder="Sprechen Sie mit dem Bot...">
+                <button id="send-button">
+                    <i class="material-icons">send</i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
