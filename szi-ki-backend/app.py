@@ -20,7 +20,27 @@ HEADERS = {
 app = Flask(__name__)
 CORS(app)  # Erlaubt Cross-Origin-Anfragen für React
 
+# TODO: Stellt euch die Frage: Für welche Interaktionen braucht der Nutzer Daten vom Backend? Dann wisst ihr welche Endpoints wir brauchen.
 
+
+"""
+Gets all conversation (ID, Title) to Display on the Sidebar
+"""
+@app.route('/api/getConversations', method=['POST'])
+def getConversations():
+    pass
+
+"""
+Gets a single Chat (history) with a conversation_id 
+"""
+@app.route('api/getChat', method=['POST'])
+def getChat():
+    pass
+
+#TODO: If conversation_id == Null, make new chat
+"""
+Sends a message to the AI-chat, 
+"""
 @app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.json
@@ -49,7 +69,6 @@ def chat():
         })
     else:
         return jsonify({"error": "Fehler bei der Kommunikation mit Dify"}), response.status_code
-
 
 
 @app.route('/api/health', methods=['GET'])
