@@ -3,9 +3,8 @@ from datetime import datetime
 
 class UserService:
     def __init__(self):
-        self.db_conn = DatabaseConnections()
-        self.db = self.db_conn.get_mongodb()
-        self.users_collection = self.db.users
+        db = DatabaseConnections().get_mongodb()
+        self.users_collection = db.users
 
     def create_user(self, user_id):
         user_doc = {

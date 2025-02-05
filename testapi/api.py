@@ -5,19 +5,14 @@ from config import Config
 from db.user_service import UserService
 
 app = Flask(__name__)
+
+# Initialize database connection once
 db_conn = DatabaseConnections()
+db_conn.connect_all()
+
+# Initialize services
 message_controller = MessageController()
 user_service = UserService()
-
-# Track initialization state
-_is_initialized = False
-
-@app.before_request
-def initialize_connections():
-    global _is_initialized
-    if not _is_initialized:
-        db_conn.connect_all()
-        _is_initialized = True
 
 @app.route('/')
 def home():

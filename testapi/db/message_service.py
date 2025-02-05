@@ -3,9 +3,8 @@ from datetime import datetime
 
 class MessageService:
     def __init__(self):
-        self.db_conn = DatabaseConnections()
-        self.db = self.db_conn.get_mongodb()
-        self.messages_collection = self.db.messages
+        db = DatabaseConnections().get_mongodb()
+        self.messages_collection = db.messages
 
     def save_message(self, conversation_id, user_message, ai_response):
         message_doc = {

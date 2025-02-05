@@ -4,11 +4,25 @@ import time
 from config import Config
 
 class DatabaseConnections:
+    _instance = None
+    _is_initialized = False
+    _is_connected = False
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(DatabaseConnections, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self):
-        self.mongodb_client = None
-        self.db = None
+        if not self._is_initialized:
+            self.mongodb_client = None
+            self.db = None
+            self._is_initialized = True
 
     def connect_all(self):
+        if self._is_connected:
+            return self.db
+
         max_retries = 5
         retry_delay = 3
         
@@ -43,7 +57,8 @@ class DatabaseConnections:
                     )
                 
                 print("MongoDB connection established successfully!")
-                return
+                self._is_connected = True
+                return self.db
                 
             except ConnectionFailure as e:
                 print(f"MongoDB connection failure: {str(e)}")
@@ -59,12 +74,13 @@ class DatabaseConnections:
                 raise Exception(f"Failed to connect after {max_retries} attempts")
 
     def close_all(self):
-        if self.mongodb_client:
+        if self.mongodb_client is not None:
             self.mongodb_client.close()
             self.mongodb_client = None
             self.db = None
+            self._is_connected = False
 
     def get_mongodb(self):
-        if not self.mongodb_client or not self.db:
-            self.connect_all()
+        if not self._is_connected or self.mongodb_client is None:
+            return self.connect_all()
         return self.db
