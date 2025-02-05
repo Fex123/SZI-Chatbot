@@ -1,12 +1,19 @@
 import requests
 from config import Config
 from db.message_service import MessageService
+from db.user_service import UserService
 
 class MessageController:
     def __init__(self):
         self.message_service = MessageService()
+        self.user_service = UserService()
 
     def send_message_to_dify(self, query, conversation_id=None, user_id="dev-user"):
+        # Ensure user exists
+        user = self.user_service.get_user(user_id)
+        if not user:
+            self.user_service.create_user(user_id)
+
         payload = {
             "inputs": {},
             "query": query,
@@ -30,6 +37,9 @@ class MessageController:
 
         # Save to database
         self.message_service.save_message(new_conversation_id, query, ai_response)
+
+        if new_conversation_id:
+            self.user_service.add_conversation(user_id, new_conversation_id)
 
         return {
             'conversation_id': new_conversation_id,
