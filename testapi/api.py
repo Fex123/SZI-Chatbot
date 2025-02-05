@@ -9,9 +9,15 @@ db_conn = DatabaseConnections()
 message_controller = MessageController()
 user_service = UserService()
 
-@app.before_first_request
+# Track initialization state
+_is_initialized = False
+
+@app.before_request
 def initialize_connections():
-    db_conn.connect_all()
+    global _is_initialized
+    if not _is_initialized:
+        db_conn.connect_all()
+        _is_initialized = True
 
 @app.route('/')
 def home():

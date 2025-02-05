@@ -14,7 +14,7 @@ class MessageService:
                 {'role': 'user', 'content': user_message},
                 {'role': 'assistant', 'content': ai_response}
             ],
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now()
         }
         return self.messages_collection.insert_one(message_doc)
     

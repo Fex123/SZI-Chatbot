@@ -10,7 +10,7 @@ class UserService:
     def create_user(self, user_id):
         user_doc = {
             'user_id': user_id,
-            'created_at': datetime.utcnow(),
+            'created_at': datetime.now(),
             'conversations': []
         }
         return self.users_collection.insert_one(user_doc)
