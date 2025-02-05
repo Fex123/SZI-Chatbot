@@ -131,42 +131,46 @@ Sends a message to the AI-chat,
 """
 @app.route('/api/send-message', methods=['GET','POST'])
 def send_message():
-    user_query = request.args.get("query")
-    conversation_id = request.args.get("conversation_id")
-    # Request BODY
-    """
-    data = request.json
-    user_query = data.get("query")
-    conversation_id = data.get("conversation_id")
-    """
+    if request.method == 'POST':
+        # Request QUERY
+        user_query = request.args.get("query")
+        conversation_id = request.args.get("conversation_id")
+        # Request BODY
+        """
+        data = request.json
+        user_query = data.get("query")
+        conversation_id = data.get("conversation_id")
+        """
 
 
-    print("Sending message to dify", user_query)
-    if not user_query:
-        return jsonify({"error": "Query ist erforderlich"}), 400
+        print("Sending message to dify", user_query)
+        if not user_query:
+            return jsonify({"error": "Query ist erforderlich"}), 400
 
-    payload = {
-        "inputs": {},
-        "query": user_query,
-        "response_mode": "blocking",
-        "conversation_id": "",
-        "user": "user-123"
-    }
+        payload = {
+            "inputs": {},
+            "query": user_query,
+            "response_mode": "blocking",
+            "conversation_id": "",
+            "user": "user-123"
+        }
 
 
-    response = requests.post(f"{dify_url}/chat-messages", headers=HEADERS, json=payload)
-    if response.status_code == 200:
-        response_data = response.json()
-        new_conversation_id = response_data.get("conversation_id")
-        reply = response_data.get("answer", "Keine Antwort erhalten.")
+        response = requests.post(f"{dify_url}/chat-messages", headers=HEADERS, json=payload)
+        if response.status_code == 200:
+            response_data = response.json()
+            new_conversation_id = response_data.get("conversation_id")
+            reply = response_data.get("answer", "Keine Antwort erhalten.")
 
-        # TODO: Load conversation into database
-        # conversations = load_conversation()
-        save_conversation(new_conversation_id, reply)
-        return new_conversation_id, reply
+            # TODO: Load conversation into database
+            # conversations = load_conversation()
+            save_conversation(new_conversation_id, reply)
+            return new_conversation_id, reply
+        else:
+            return jsonify({"error": f"Fehler bei der Kommunikation mit Dify, {response.status_code}"}), response.status_code
     else:
-        return jsonify({"error": f"Fehler bei der Kommunikation mit Dify, {response.status_code}"}), response.status_code
 
+        return jsonify({"error": "Methode nicht erlaubt"}), 405
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "running"})
@@ -201,3 +205,5 @@ def test():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+    with app.test_request_context():
+        print(health_check())
