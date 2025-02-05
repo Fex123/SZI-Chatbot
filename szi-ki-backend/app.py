@@ -126,8 +126,9 @@ SAMPLE REQUEST DATA
 """
 
 #TODO: If conversation_id == Null, make new chat
+#TODO: Return entire chat history with every http response?
 """
-Sends a message to the AI-chat, 
+Sends a message to the AI-chat, returns the AI's response, Adds the messages to chat history
 """
 @app.route('/api/send-message', methods=['GET','POST'])
 def send_message():
