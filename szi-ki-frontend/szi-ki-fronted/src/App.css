@@ -114,7 +114,17 @@ html, body {
   color: #fff;
 }
 
-.ki-svg path, .student-svg path, .send-svg path, .plus-svg path {
+.ki-svg path, .student-svg path {
+  fill: #333333; 
+  stroke: #333333; 
+}
+
+.container.dark .ki-svg path, .container.dark .student-svg path {
+  fill: #bdbdbd; 
+  stroke: #bdbdbd; 
+}
+
+.send-svg path, .plus-svg path {
   fill: #000000; 
   stroke: #000000; 
 }
