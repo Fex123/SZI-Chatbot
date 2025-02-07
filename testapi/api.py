@@ -18,6 +18,12 @@ user_service = UserService()
 def home():
     return "Welcome to the chat API! Use /api/chat/send to send a message. (Post request with 'query' in JSON body)"
 
+
+"""
+Post a message to the chatbot, receive the result of the conversation.
+Example usage:
+    - User sends a message to the chatbot using the input
+"""
 @app.route('/api/chat/send', methods=['POST'])
 def send_message():
     try:
@@ -36,6 +42,12 @@ def send_message():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+"""
+Get Chat Hisotry from one specific Conversation.
+Example usage:
+    - Click on Chat in the sidebar to see the Conversations chat history
+"""
 @app.route('/api/chat/history/<conversation_id>', methods=['GET'])
 def get_chat_history(conversation_id):
     try:
@@ -44,6 +56,11 @@ def get_chat_history(conversation_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+"""
+Get all Chats from one specific User
+Example usage:
+    - When opening the App, Display all Chats the user had on the Sidebar
+"""
 @app.route('/api/user/<user_id>/conversations', methods=['GET'])
 def get_user_conversations(user_id):
     try:
