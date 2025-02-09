@@ -2,13 +2,14 @@ export class Chat {
     private _messages: string[];
     title: string;
     date: Date;
+    registered: boolean = false;
 
   
-    constructor(title: string, messages: string[], date: Date) {
+    constructor(title: string, messages: string[], date: Date, registered: boolean = false) {
       this.title = title;
       this._messages = messages;
       this.date = date;
-
+      this.registered = registered;
     }
   
     get messages(): string[] {

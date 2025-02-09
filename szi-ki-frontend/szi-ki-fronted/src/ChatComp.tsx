@@ -11,6 +11,7 @@ import DarkModeToggle from './Dmtoggle';
 interface ChatProps {
   chat: Chat | null;
   toggleDarkmode: () => void;
+  addChat: (chat: Chat) => void;
 }
 
 const kiSvg = (
@@ -40,7 +41,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
 
   constructor(props: ChatProps) {
     super(props);
-    console.log('X1 Chat selected in Chatcomp :', this.props.chat);
+    //console.log('X1 Chat selected in Chatcomp :', this.props.chat);
     this.state = {
       inputText: '',
     };
@@ -58,7 +59,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
     }
   };
 
-  handleButtonClick = () => {
+  handleInputButtonClick = () => {
     const { chat } = this.props;
     const { inputText } = this.state;
     const trimmedInput = inputText.trim();
@@ -68,6 +69,13 @@ class ChatComp extends Component<ChatProps, ChatState> {
 
     if (chat) {
       chat.messages.push(trimmedInput);
+      //TODO: Response verarbeitung
+      if(chat.registered == false) {
+        chat.registered = true;
+        chat.title = "Test new Chat"; //TODO: Get title from response
+        chat.date = new Date(); //TODO: Get date from response
+        this.props.addChat(chat)
+      } 
     }
 
     this.setState({
@@ -117,7 +125,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
               value={inputText}
               onChange={this.handleInputChange}
             />
-            <button className="send-button" onClick={this.handleButtonClick}>{sendSvg}</button>
+            <button className="send-button" onClick={this.handleInputButtonClick}>{sendSvg}</button>
           </div>
         </div>
       </div>

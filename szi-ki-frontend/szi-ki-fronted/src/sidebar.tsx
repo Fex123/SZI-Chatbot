@@ -15,7 +15,6 @@ interface SidebarProps {
 }
 
 interface SidebarState {
-  chats: Chat[];
   lastDate: string | null;
 }
 
@@ -23,7 +22,6 @@ class Sidebar extends Component<SidebarProps, SidebarState> {
   constructor(props: SidebarProps) {
     super(props);
     this.state = {
-      chats: this.props.chats,
       lastDate: null,
     };
   }
@@ -35,7 +33,6 @@ class Sidebar extends Component<SidebarProps, SidebarState> {
 
   render() {
     const { toggleDarkmode } = this.props;
-    const { chats } = this.state;
 
     return (
       <div className="sidebar">
@@ -44,9 +41,11 @@ class Sidebar extends Component<SidebarProps, SidebarState> {
         </div>
         <div className="sidebar-top-bar">
           <DarkModeToggle isDark={false} toggleDarkMode={toggleDarkmode} />
-          {newChatSvg}
+          <button className='dark-mode-button' onClick={() => this.setChat(new Chat("New Chat", [], new Date(), false))}>
+            {newChatSvg}
+          </button>
         </div>
-        {chats.map((chat, index) => {
+        {this.props.chats.map((chat, index) => {
           return (
             <React.Fragment key={index}>
               <div className="chat-sidebar-item" onClick={() => this.setChat(chat)}>
