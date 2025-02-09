@@ -296,7 +296,6 @@ svg {
 .sidebar-date-title {
   padding-left: 8px;
   margin-top: 40px;
-  margin-bottom: 8px;
   text-align: left;
   font-weight: bold;
   font-size: 0.95em;
@@ -305,4 +304,35 @@ svg {
 .sidebar-top-logo {
   padding: 20px;
   margin: 0;
+}
+
+
+.loading-dots {
+  display: flex;  
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.loading-dots span {
+  display: inline-block;
+  margin: 0 2px;
+  font-size: 1em;
+  animation: blink 1s infinite;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
 }

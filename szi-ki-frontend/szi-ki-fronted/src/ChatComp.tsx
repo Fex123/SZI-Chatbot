@@ -34,6 +34,7 @@ const studentSvg = (
 
 interface ChatState {
   inputText: string;
+  isLoading: boolean;
 }
 
 class ChatComp extends Component<ChatProps, ChatState> {
@@ -44,6 +45,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
     //console.log('X1 Chat selected in Chatcomp :', this.props.chat);
     this.state = {
       inputText: '',
+      isLoading: false,
     };
   }
 
@@ -69,6 +71,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
 
     if (chat) {
       chat.messages.push(trimmedInput);
+      this.setState({ isLoading: true });
       //TODO: Response verarbeitung
       if(chat.registered == false) {
         chat.registered = true;
@@ -83,11 +86,19 @@ class ChatComp extends Component<ChatProps, ChatState> {
     }, () => {
       this.adjustTextareaHeight(); // Reset the textarea height after clearing the input
     });
+
+    // Simulate response delay
+    setTimeout(() => {
+      this.setState({ isLoading: false });
+      if (chat) {
+        chat.messages.push("This is a simulated response."); // Simulated response
+      }
+    }, 2000); // Simulate a 2-second delay
   };
 
   render() {
     const { chat } = this.props;
-    const { inputText } = this.state;
+    const { inputText, isLoading } = this.state;
 
     return (
       <div className="content">
@@ -114,6 +125,20 @@ class ChatComp extends Component<ChatProps, ChatState> {
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="chat-message-wrapper">
+                <div className="chat-profile-pic">
+                  {kiSvg}
+                </div>
+                <div className="user-message">
+                  <div className="loading-dots">
+                    <span>.</span>
+                    <span>.</span>
+                    <span>.</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="chat-text-input-wrapper">
