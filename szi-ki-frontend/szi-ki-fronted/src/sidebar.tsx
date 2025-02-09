@@ -52,11 +52,11 @@ class Sidebar extends Component<SidebarProps, SidebarState> {
         <div className="sidebar-top-logo">
           <img src={logo} alt="Logo" className="dhbw-logo" title="Create new chat"/>
         </div>
-        <div className="sidebar-top-bar">
-          <DarkModeToggle isDark={false} toggleDarkMode={toggleDarkmode} />
-          <button className='dark-mode-button' onClick={() => this.setChat(new Chat("New Chat", [], new Date(), false))}>
+        <div className="sidebar-top-bar" onClick={() => this.setChat(new Chat("New Chat", [], new Date(), false))}>
+          <button className='dark-mode-button' >
             {newChatSvg}
           </button>
+          <p className='new-chat'>Neuer Chat</p>
         </div>
         {sortedDates.map(date => (
           <React.Fragment key={date}>

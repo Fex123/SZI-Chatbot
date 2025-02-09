@@ -150,7 +150,10 @@ class ChatComp extends Component<ChatProps, ChatState> {
               value={inputText}
               onChange={this.handleInputChange}
             />
-            <button className="send-button" onClick={this.handleInputButtonClick}>{sendSvg}</button>
+            <button className="send-button" onClick={this.handleInputButtonClick}>
+            <div className="icon-hover-wrapper">
+              {sendSvg}
+              </div></button>
           </div>
         </div>
       </div>

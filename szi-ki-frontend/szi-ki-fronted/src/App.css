@@ -153,6 +153,9 @@ html, body {
   background-color: #00000000;
   border:#00000000;
   padding-right: 20px;
+  max-height: 33px;
+  display: flex;
+  align-items: center;
 }
 
 .sidebar .dark-mode-button {
@@ -162,6 +165,21 @@ html, body {
 svg {
   transition: fill 0.1s;
 }
+
+.icon-hover-wrapper {
+  padding: 4px;
+  border-radius: 20%;
+  background-color: #00000000;
+  transition: background-color 0.1s, color 0.1s; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-hover-wrapper:hover {
+  background-color: #99999949;
+}
+
 
 .container .dark-mode-button svg {
   fill: #000000; /* Default color for light mode */
@@ -243,8 +261,8 @@ svg {
   border-radius: 8px;
   text-align: left;
   font-size: 0.95em;
-  justify-content: space-between;
   display: flex;
+  transition: background-color 0.1s, color 0.1s; 
 }
 
 .dhbw-logo {
@@ -253,18 +271,31 @@ svg {
 }
 
 .container.dark .sidebar-top-bar {
-  background-color: #202020;
+  background-color: #303030;
+  color: #fff;
+}
+
+.container.dark .sidebar-top-bar:hover {
+  background-color: #404040;
   color: #fff;
 }
 
 .sidebar-top-bar {
   background-color: #e0e0e0;
-  display: flex; 
+  color: #000;
+}
+
+.sidebar-top-bar:hover {
+  background-color: #d3d3d3;
+  color: #000;
 }
 
 .new-chat {
-  width: fit-content;
-  margin-left: 20px;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+  margin-bottom: 0px;
+  margin-top: 0px;
 }
 
 .chat-sidebar-item {
