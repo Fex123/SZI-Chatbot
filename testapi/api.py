@@ -18,6 +18,22 @@ user_service = UserService()
 def home():
     return "Welcome to the chat API! Use /api/chat/send to send a message. (Post request with 'query' in JSON body)"
 
+"""
+Post a new conversation to the chatbot, receive new conversation.
+Example usage:
+    - User clicks on "New Chat" button to create a new conversation
+"""
+@app.route('/api/chat/new', methods=['POST'])
+def create_new_chat():
+    try:
+        data = request.json or {}
+        user_id = data.get('user_id', 'dev-user')
+        title = data.get('title')
+        
+        result = message_controller.create_new_chat(user_id, title)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 """
 Post a message to the chatbot, receive the result of the conversation.
@@ -42,11 +58,10 @@ def send_message():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 """
-Get Chat Hisotry from one specific Conversation.
+Get chat history from one specific conversation.
 Example usage:
-    - Click on Chat in the sidebar to see the Conversations chat history
+    - Click on chat in the sidebar to see the Conversations chat history
 """
 @app.route('/api/chat/history/<conversation_id>', methods=['GET'])
 def get_chat_history(conversation_id):
@@ -57,9 +72,9 @@ def get_chat_history(conversation_id):
         return jsonify({'error': str(e)}), 500
 
 """
-Get all Chats from one specific User
+Get all chats from one specific User
 Example usage:
-    - When opening the App, Display all Chats the user had on the Sidebar
+    - When opening the app, display all chats the user had on the sidebar
 """
 @app.route('/api/user/<user_id>/conversations', methods=['GET'])
 def get_user_conversations(user_id):
@@ -68,6 +83,34 @@ def get_user_conversations(user_id):
         if not user:
             return jsonify({'error': 'User not found'}), 404
         return jsonify({'conversations': user.get('conversations', [])}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+"""
+Get all messages from one specific conversation for a user
+Example usage:
+    - When opening a chat, display all messages from that chat
+"""
+@app.route('/api/chat/<conversation_id>/messages', methods=['GET'])
+def get_chat_messages(conversation_id):
+    try:
+        user_id = request.args.get('user_id', 'dev-user')
+        messages = message_controller.get_user_chat_history(conversation_id, user_id)
+        return jsonify(messages), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+"""
+Get all available conversations for a user
+Example usage:
+    - When opening the App, display all chats the user had on the sidebar
+"""
+@app.route('/api/chat/conversations', methods=['GET'])
+def get_conversations():
+    try:
+        user_id = request.args.get('user_id', 'dev-user')
+        conversations = message_controller.get_user_conversations(user_id)
+        return jsonify(conversations), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

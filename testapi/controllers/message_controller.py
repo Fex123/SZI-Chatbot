@@ -45,3 +45,42 @@ class MessageController:
             'conversation_id': new_conversation_id,
             'response': ai_response
         }
+
+    def create_new_chat(self, user_id, title=None):
+        conversation = self.message_service.create_conversation(user_id, title)
+        self.user_service.add_conversation(user_id, conversation['conversation_id'])
+        return conversation
+
+    def get_user_chat_history(self, conversation_id, user_id):
+        # Get chat history from Dify API
+        response = requests.get(
+            f"{Config.DIFY_URL}/messages",
+            headers=Config.DIFY_HEADERS,
+            params={'conversation_id': conversation_id, 'user': user_id}
+        )
+        
+        if response.status_code != 200:
+            raise Exception(f"Dify API error: {response.status_code}")
+            
+        return response.json()
+
+    def get_user_conversations(self, user_id):
+        # Get conversations from Dify API
+        response = requests.get(
+            f"{Config.DIFY_URL}/conversations",
+            headers=Config.DIFY_HEADERS,
+            params={'user': user_id}
+        )
+        
+        if response.status_code != 200:
+            raise Exception(f"Dify API error: {response.status_code}")
+            
+        dify_conversations = response.json()
+        
+        # Get local conversations
+        local_conversations = self.message_service.get_conversations(user_id)
+        
+        return {
+            'dify_conversations': dify_conversations,
+            'local_conversations': list(local_conversations)
+        }
