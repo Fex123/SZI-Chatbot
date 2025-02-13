@@ -23,6 +23,7 @@ Post a new conversation to the chatbot, receive new conversation.
 Example usage:
     - User clicks on "New Chat" button to create a new conversation
 """
+# TODO: Kinda works, creates a new chat database entry but doesnt return anything, instead 500 error
 @app.route('/api/chat/new', methods=['POST'])
 def create_new_chat():
     try:
@@ -63,6 +64,8 @@ Get chat history from one specific conversation.
 Example usage:
     - Click on chat in the sidebar to see the Conversations chat history
 """
+# TODO: Broken, example: http://127.0.0.1:5000/api/chat/history/"e7116c61-5e12-441d-a793-5a9922c37a70"
+# returns: { "messages": [] }
 @app.route('/api/chat/history/<conversation_id>', methods=['GET'])
 def get_chat_history(conversation_id):
     try:
@@ -75,6 +78,13 @@ def get_chat_history(conversation_id):
 Get all chats from one specific User
 Example usage:
     - When opening the app, display all chats the user had on the sidebar
+EXAMPLE CALL: http://127.0.0.1:5000/api/user/dev_user/conversations
+RETURNS: {
+    "conversations": [
+        "e7116c61-5e12-441d-a793-5a9922c37a70",
+        "67ae405ae63552191d42c01f"
+    ]
+}
 """
 @app.route('/api/user/<user_id>/conversations', methods=['GET'])
 def get_user_conversations(user_id):
@@ -90,6 +100,9 @@ def get_user_conversations(user_id):
 Get all messages from one specific conversation for a user
 Example usage:
     - When opening a chat, display all messages from that chat
+
+Example call:  /api/chat/DB_CONVERSATION_ID/messages?user_id=dev_user
+
 """
 @app.route('/api/chat/<conversation_id>/messages', methods=['GET'])
 def get_chat_messages(conversation_id):
@@ -104,7 +117,19 @@ def get_chat_messages(conversation_id):
 Get all available conversations for a user
 Example usage:
     - When opening the App, display all chats the user had on the sidebar
+
+Example call: http://127.0.0.1:5000/api/chat/conversations?user_id="dev_user"
+returns: 
+{
+    "dify_conversations": {
+        "data": [],
+        "has_more": false,
+        "limit": 20
+    },
+    "local_conversations": []
+}
 """
+# TODO: Change DIFYAPI call logic, returns weird stuff
 @app.route('/api/chat/conversations', methods=['GET'])
 def get_conversations():
     try:
