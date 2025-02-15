@@ -24,7 +24,9 @@ class SendMessageRequest(BaseModel):
     conversation_id: Optional[str] = None
     user_id: str = "dev-user"
 
-
+class CreateNewChatRequest(BaseModel):
+    user_id: str = "dev-user"
+    title: Optional[str] = None
 
 
 """
@@ -44,11 +46,12 @@ Example usage:
 def create_new_chat():
     try:
         data = request.json or {}
-        user_id = data.get('user_id', 'dev-user')
-        title = data.get('title')
+        request_params = CreateNewChatRequest(**data)
 
-        result = message_controller.create_new_chat(user_id, title)
+        result = message_controller.create_new_chat(request_params.user_id, request_params.title)
         return jsonify(result), 200
+    except ValidationError as e:
+        return jsonify({'error': e.errors()}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
