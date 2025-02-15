@@ -106,6 +106,8 @@ RETURNS: {
     ]
 }
 """
+# TODO: Rückgabe muss für jede Conversation das Erstelldatum (Timestamp), enthalten
+# TODO: In der Collection muss ein Titel in natürlicher Sprache enthalten sein!
 @app.route('/api/user/<user_id>/conversations', methods=['GET'])
 def get_user_conversations(user_id):
     try:
@@ -123,8 +125,6 @@ Example usage:
 
 Example call:  /api/chat/DB_CONVERSATION_ID/messages?user_id=dev_user
 """
-# TODO: Rückgabe muss für jede Conversation das Erstelldatum (Timestamp), enthalten
-# TODO: In der Collection muss ein Titel in natürlicher Sprache enthalten sein!
 @app.route('/api/chat/<conversation_id>/messages', methods=['GET'])
 def get_chat_messages(conversation_id):
     try:
