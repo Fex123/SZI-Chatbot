@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+from pydantic import BaseModel, ValidationError
+from typing import Optional
 from db_connections import DatabaseConnections
 from controllers.message_controller import MessageController
 from config import Config
@@ -14,6 +16,20 @@ db_conn.connect_all()
 message_controller = MessageController()
 user_service = UserService()
 
+"""
+    Request Body Classes:
+"""
+class SendMessageRequest(BaseModel):
+    query: str
+    conversation_id: Optional[str] = None
+    user_id: str = "dev-user"
+
+
+
+
+"""
+    Endpoints:
+"""
 @app.route('/')
 def home():
     return "Welcome to the chat API! Use /api/chat/send to send a message. (Post request with 'query' in JSON body)"
@@ -30,7 +46,7 @@ def create_new_chat():
         data = request.json or {}
         user_id = data.get('user_id', 'dev-user')
         title = data.get('title')
-        
+
         result = message_controller.create_new_chat(user_id, title)
         return jsonify(result), 200
     except Exception as e:
@@ -45,17 +61,18 @@ Example usage:
 def send_message():
     try:
         data = request.json
-        if not data or 'query' not in data:
-            return jsonify({'error': 'Query is required'}), 400
+        request_params = SendMessageRequest(**data)
 
         result = message_controller.send_message_to_dify(
-            query=data['query'],
-            conversation_id=data.get('conversation_id'),
-            user_id=data.get('user_id', 'dev-user')
+            query=request_params.query,
+            conversation_id=request_params.conversation_id,
+            user_id=request_params.user_id
         )
 
         return jsonify(result), 200
 
+    except ValidationError as e:
+        return jsonify({'error': e.errors()}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -102,7 +119,6 @@ Example usage:
     - When opening a chat, display all messages from that chat
 
 Example call:  /api/chat/DB_CONVERSATION_ID/messages?user_id=dev_user
-
 """
 @app.route('/api/chat/<conversation_id>/messages', methods=['GET'])
 def get_chat_messages(conversation_id):
