@@ -5,6 +5,7 @@ from db_connections import DatabaseConnections
 from controllers.message_controller import MessageController
 from config import Config
 from db.user_service import UserService
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -28,27 +29,65 @@ class CreateNewChatRequest(BaseModel):
     user_id: str = "dev-user"
     title: Optional[str] = None
 
+class GetConversationRequest(BaseModel):
+    user_id: str = "dev-user"
+    conversation_id: str
 
 """
-    Endpoints:
+    Response Classes:
+"""
+class ConversationResponse(BaseModel):
+    id: str
+    title: str
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+class MessageResponse(BaseModel):
+    role: str
+    content: str
+    timestamp: datetime
+
+"""
+Root endpoint
+GET /
+Returns a welcome message
 """
 @app.route('/')
 def home():
-    return "Welcome to the chat API! Use /api/chat/send to send a message. (Post request with 'query' in JSON body)"
+    return "Welcome to the chat API!"
 
 """
-Post a new conversation to the chatbot, receive new conversation.
-Example usage:
-    - User clicks on "New Chat" button to create a new conversation
+Create a new chat conversation
+POST /api/chat/new
+
+Request body:
+{
+    "user_id": "dev-user",    # optional, defaults to "dev-user"
+    "title": "My Chat"        # optional, defaults to timestamp-based title
+}
+
+Response:
+{
+    "conversation_id": "507f1f77bcf86cd799439011",
+    "title": "My Chat",
+    "created_at": "2024-02-20T15:30:00.000Z",
+    "user_id": "dev-user"
+}
+
+Example curl:
+curl -X POST http://localhost:5000/api/chat/new \
+    -H "Content-Type: application/json" \
+    -d '{"title": "My Chat", "user_id": "dev-user"}'
 """
-# TODO: Kinda works, creates a new chat database entry but doesnt return anything, instead 500 error
 @app.route('/api/chat/new', methods=['POST'])
 def create_new_chat():
     try:
-        data = request.json or {}
-        request_params = CreateNewChatRequest(**data)
-
-        result = message_controller.create_new_chat(request_params.user_id, request_params.title)
+        request_params = CreateNewChatRequest(**request.json or {})
+        default_title = f"New Chat {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        result = message_controller.create_new_chat(
+            request_params.user_id, 
+            request_params.title or default_title
+        )
         return jsonify(result), 200
     except ValidationError as e:
         return jsonify({'error': e.errors()}), 400
@@ -56,9 +95,26 @@ def create_new_chat():
         return jsonify({'error': str(e)}), 500
 
 """
-Post a message to the chatbot, receive the result of the conversation.
-Example usage:
-    - User sends a message to the chatbot using the input
+Send a message to the chatbot
+POST /api/chat/send
+
+Request body:
+{
+    "query": "Hello, how are you?",
+    "conversation_id": "507f1f77bcf86cd799439011",  # optional
+    "user_id": "dev-user"                           # optional
+}
+
+Response:
+{
+    "conversation_id": "507f1f77bcf86cd799439011",
+    "response": "Hello! I'm doing well, thank you for asking. How can I help you today?"
+}
+
+Example curl:
+curl -X POST http://localhost:5000/api/chat/send \
+    -H "Content-Type: application/json" \
+    -d '{"query": "Hello, how are you?", "conversation_id": "507f1f77bcf86cd799439011"}'
 """
 @app.route('/api/chat/send', methods=['POST'])
 def send_message():
@@ -80,83 +136,95 @@ def send_message():
         return jsonify({'error': str(e)}), 500
 
 """
-Get chat history from one specific conversation.
-Example usage:
-    - Click on chat in the sidebar to see the Conversations chat history
-"""
-# TODO: Broken, example: http://127.0.0.1:5000/api/chat/history/"e7116c61-5e12-441d-a793-5a9922c37a70"
-# returns: { "messages": [] }
-@app.route('/api/chat/history/<conversation_id>', methods=['GET'])
-def get_chat_history(conversation_id):
-    try:
-        messages = message_controller.message_service.get_conversation_history(conversation_id)
-        return jsonify({'messages': list(messages)}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+Get all conversations for a user
+GET /api/conversations?user_id=dev_user
 
-"""
-Get all chats from one specific User
-Example usage:
-    - When opening the app, display all chats the user had on the sidebar
-EXAMPLE CALL: http://127.0.0.1:5000/api/user/dev_user/conversations
-RETURNS: {
+Query parameters:
+- user_id: string (optional, defaults to "dev-user")
+
+Response:
+{
     "conversations": [
-        "e7116c61-5e12-441d-a793-5a9922c37a70",
-        "67ae405ae63552191d42c01f"
+        {
+            "id": "507f1f77bcf86cd799439011",
+            "title": "My Chat",
+            "created_at": "2024-02-20T15:30:00.000Z",
+            "updated_at": "2024-02-20T15:35:00.000Z"
+        },
+        ...
     ]
 }
-"""
-# TODO: Rückgabe muss für jede Conversation das Erstelldatum (Timestamp), enthalten
-# TODO: In der Collection muss ein Titel in natürlicher Sprache enthalten sein!
-@app.route('/api/user/<user_id>/conversations', methods=['GET'])
-def get_user_conversations(user_id):
-    try:
-        user = user_service.get_user(user_id)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        return jsonify({'conversations': user.get('conversations', [])}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
+Example curl:
+curl "http://localhost:5000/api/conversations?user_id=dev_user"
 """
-Get all messages from one specific conversation for a user
-Example usage:
-    - When opening a chat, display all messages from that chat
-
-Example call:  /api/chat/DB_CONVERSATION_ID/messages?user_id=dev_user
-"""
-@app.route('/api/chat/<conversation_id>/messages', methods=['GET'])
-def get_chat_messages(conversation_id):
+@app.route('/api/conversations', methods=['GET'])
+def get_user_conversations():
     try:
         user_id = request.args.get('user_id', 'dev-user')
-        messages = message_controller.get_user_chat_history(conversation_id, user_id)
-        return jsonify(messages), 200
+        conversations = message_controller.message_service.get_conversations(user_id)
+        
+        formatted_conversations = [
+            ConversationResponse(
+                id=conv['conversation_id'],
+                title=conv['title'],
+                created_at=conv['created_at'],
+                updated_at=conv.get('updated_at')
+            ).model_dump()
+            for conv in conversations
+        ]
+        
+        return jsonify({'conversations': formatted_conversations}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 """
-Get all available conversations for a user
-Example usage:
-    - When opening the App, display all chats the user had on the sidebar
+Get all messages from a conversation
+GET /api/conversations/<conversation_id>/messages?user_id=dev_user
 
-Example call: http://127.0.0.1:5000/api/chat/conversations?user_id="dev_user"
-returns: 
+Path parameters:
+- conversation_id: string (required)
+
+Query parameters:
+- user_id: string (optional, defaults to "dev-user")
+
+Response:
 {
-    "dify_conversations": {
-        "data": [],
-        "has_more": false,
-        "limit": 20
-    },
-    "local_conversations": []
+    "messages": [
+        {
+            "role": "user",
+            "content": "Hello, how are you?",
+            "timestamp": "2024-02-20T15:30:00.000Z"
+        },
+        {
+            "role": "assistant",
+            "content": "Hello! I'm doing well, thank you for asking. How can I help you today?",
+            "timestamp": "2024-02-20T15:30:01.000Z"
+        },
+        ...
+    ]
 }
+
+Example curl:
+curl "http://localhost:5000/api/conversations/507f1f77bcf86cd799439011/messages?user_id=dev_user"
 """
-# TODO: Change DIFYAPI call logic, returns weird stuff
-@app.route('/api/chat/conversations', methods=['GET'])
-def get_conversations():
+@app.route('/api/conversations/<conversation_id>/messages', methods=['GET'])
+def get_conversation_messages(conversation_id):
     try:
         user_id = request.args.get('user_id', 'dev-user')
-        conversations = message_controller.get_user_conversations(user_id)
-        return jsonify(conversations), 200
+        messages = message_controller.message_service.get_conversation_history(conversation_id)
+        
+        formatted_messages = [
+            MessageResponse(
+                role=m['role'],
+                content=m['content'],
+                timestamp=msg['timestamp']
+            ).model_dump()
+            for msg in messages
+            for m in msg['messages']
+        ]
+        
+        return jsonify({'messages': formatted_messages}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

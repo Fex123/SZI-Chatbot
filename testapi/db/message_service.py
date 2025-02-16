@@ -24,7 +24,11 @@ class MessageService:
     def get_conversation_history(self, conversation_id):
         return self.messages_collection.find(
             {'conversation_id': conversation_id},
-            {'messages': 1, 'timestamp': 1}
+            {
+                'messages': 1,
+                'timestamp': 1,
+                '_id': 0
+            }
         ).sort('timestamp', 1)
 
     def create_conversation(self, user_id, title=None):
@@ -42,7 +46,13 @@ class MessageService:
     def get_conversations(self, user_id):
         return self.messages_collection.find(
             {'user_id': user_id},
-            {'conversation_id': 1, 'title': 1, 'created_at': 1}
+            {
+                'conversation_id': 1,
+                'title': 1,
+                'created_at': 1,
+                'updated_at': 1,
+                '_id': 0
+            }
         ).sort('created_at', -1)
 
     def update_conversation_title(self, conversation_id, new_title):
