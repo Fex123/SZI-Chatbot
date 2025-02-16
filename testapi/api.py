@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from pydantic import BaseModel, ValidationError
 from typing import Optional
 from db_connections import DatabaseConnections
@@ -7,6 +8,8 @@ from config import Config
 from db.user_service import UserService
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+
 
 # Initialize database connection once
 db_conn = DatabaseConnections()
