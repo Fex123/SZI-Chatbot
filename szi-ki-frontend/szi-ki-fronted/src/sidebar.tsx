@@ -74,7 +74,7 @@ class Sidebar extends Component<SidebarProps, SidebarState> {
           </button>
           <p className='new-chat'>Neuer Chat</p>
         </div>
-        {//this.renderGroupedChats(groupedChats)
+        {this.renderGroupedChats(groupedChats)
 
         }
       </div>

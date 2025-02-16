@@ -26,7 +26,6 @@ export const fetchConversationTitles = async () => {
       'Content-Type': 'application/json'
     }});
   const data = await response.json();
-  console.log(data);
   return data;
 }
 
@@ -39,7 +38,7 @@ export class Chat {
     registered: boolean = false;
 
   
-    constructor(title: string, conversation_id: string, messages: string[], date: Date, registered: boolean = false) {
+    constructor(conversation_id: string, title: string, messages: string[], date: Date, registered: boolean = false) {
       this.title = title;
       this._messages = messages;
       this.date = date;

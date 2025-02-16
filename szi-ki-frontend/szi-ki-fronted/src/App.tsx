@@ -35,13 +35,15 @@ function App() {
   //TODO: Currently only Fetches Conv id, no messages, not title, no timestamp. 
   useEffect(() => {
     const fetchChats = async () => {
-      const conversations = await fetchConversationTitles();
-      /*
-      const fetchedChats = conversationTitles.map(title => new Chat(title, [], new Date(), true));
-      setChats(fetchedChats); */
+      const response = await fetchConversationTitles();
+      const conversations = response.conversations;
+  
+      const fetchedChats = conversations.map((conversation: string) => new Chat(conversation, `Titel von ${conversation}`, [], new Date(), true));
+      setChats(fetchedChats);
     };
-
+  
     fetchChats();
+    console.log(chats);
   }, []);
 
   const addChat = (chat: Chat) => {
