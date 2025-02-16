@@ -161,6 +161,7 @@ Response:
 Example curl:
 curl "http://localhost:5000/api/conversations?user_id=dev_user"
 """
+
 @app.route('/api/conversations', methods=['GET'])
 def get_user_conversations():
     try:

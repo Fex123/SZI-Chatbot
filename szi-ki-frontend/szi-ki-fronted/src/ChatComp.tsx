@@ -3,10 +3,24 @@ import { Chat } from './helper';
 import './App.css';
 import DarkModeToggle from './Dmtoggle';
 
-//TODO: Block Input if still waiting for response
-//TODO: implement throbber when waiting for response (User feedback => "we're working on it")
-//TODO: Create new chat in side bar when user creates a new chat
-//TODO: If chat empty, show text input in middle,
+/*
+ASK COPILOT:
+
+This is the Class Chat with its constructor:
+
+export class Chat {
+    private _messages: string[];
+    title: string;
+    conversation_id: string;
+    date: Date;
+    registered: boolean = false;
+
+  
+    constructor(conversation_id: string, title: string, messages: string[], date: Date, registered: boolean = false) {
+
+If the "chat" Prop is changed and the value for registered is "false"
+
+*/
 
 interface ChatProps {
   chat: Chat | null;

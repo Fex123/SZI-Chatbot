@@ -20,13 +20,28 @@ DANGER! Muss besprochen werden, wenn das in Prod geht, weil das ein Sicherheitsr
  */
 
 export const fetchConversationTitles = async () => {
-  const response = await fetch(`${API_URL}/api/user/${API_user}/conversations`, {
+  const response = await fetch(`${API_URL}/api/conversations?user_id=${API_user}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
     }});
   const data = await response.json();
   return data;
+}
+
+export const fetchConversationMessages = async (conversation_id: string) => { 
+  const response = await fetch(`${API_URL}/api/chat/${conversation_id}/messages?user_id=${API_user}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  const data = await response.json();
+  const messages = data.data.map((message: { answer: string; query: string }) => ({
+    answer: message.answer,
+    query: message.query
+  }));
+  return messages;
 }
 
 

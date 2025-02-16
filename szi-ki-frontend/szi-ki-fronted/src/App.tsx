@@ -27,19 +27,21 @@ const exampleChats = [
 function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [chats, setChats] = useState<Chat[]>(exampleChats);
-  const [selectedChat, setSelectedChat] = useState<Chat>(new Chat("", "", [], new Date(), false));
+  const [selectedChat, setSelectedChat] = useState<Chat>(new Chat("", "", [], new Date(), true));
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   }; 
 
-  //TODO: Currently only Fetches Conv id, no messages, not title, no timestamp. 
   useEffect(() => {
     const fetchChats = async () => {
       const response = await fetchConversationTitles();
       const conversations = response.conversations;
-  
-      const fetchedChats = conversations.map((conversation: string) => new Chat(conversation, `Titel von ${conversation}`, [], new Date(), true));
+      //TODO: Check wieso das nichts zurück gibt??? Das kann nicht sein alter
+      const fetchedChats = conversations.map((conversation: { id: string, title: string, created_at: string, updated_at: string }) => 
+        new Chat(conversation.id, conversation.title, [], new Date(conversation.created_at), true)
+      );
       setChats(fetchedChats);
+      console.log('Fetched chats:', fetchedChats);
     };
   
     fetchChats();
