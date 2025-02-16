@@ -15,13 +15,12 @@ def init_mongodb_collections():
     if 'messages' not in db.list_collection_names():
         messages_collection = db.create_collection('messages')
         # Create indexes for efficient querying
-        messages_collection.create_index([('conversation_id', ASCENDING)])
+        messages_collection.create_index([('conversation_id', ASCENDING)], unique=True)
         messages_collection.create_index([('timestamp', ASCENDING)])
-        # Compound index for conversation lookup with timestamp sorting
         messages_collection.create_index([
-            ('conversation_id', ASCENDING),
-            ('timestamp', ASCENDING)
-        ])
+            ('user_id', ASCENDING),
+            ('title', ASCENDING)
+        ], unique=True)
         print("Messages collection created successfully with indexes")
 
     client.close()

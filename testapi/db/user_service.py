@@ -1,6 +1,10 @@
 from db_connections import DatabaseConnections
 from datetime import datetime
 
+"""
+UserService class
+Responsible for handling user data operations in the database
+"""
 class UserService:
     def __init__(self):
         db = DatabaseConnections().get_mongodb()

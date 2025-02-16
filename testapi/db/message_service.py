@@ -2,6 +2,10 @@ from db_connections import DatabaseConnections
 from datetime import datetime
 from bson import ObjectId
 
+"""
+MessageService class
+Responsible for handling message operations in the database
+"""
 class MessageService:
     def __init__(self):
         db = DatabaseConnections().get_mongodb()
@@ -33,13 +37,25 @@ class MessageService:
 
     def create_conversation(self, user_id, title=None):
         conversation_id = str(ObjectId())
+        now = datetime.now()
         conversation_doc = {
             'conversation_id': conversation_id,
             'user_id': user_id,
             'title': title or "New Conversation",
-            'created_at': datetime.now(),
-            'updated_at': datetime.now()
+            'created_at': now,
+            'updated_at': now
         }
+        
+        # Check if conversation already exists
+        existing_conv = self.messages_collection.find_one({
+            'user_id': user_id,
+            'title': conversation_doc['title']
+        })
+        
+        if existing_conv:
+            return existing_conv
+            
+        # Use insert_one with unique index to prevent duplicates
         self.messages_collection.insert_one(conversation_doc)
         return conversation_doc
 

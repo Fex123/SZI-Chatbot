@@ -7,10 +7,11 @@ from controllers.message_controller import MessageController
 from config import Config
 from db.user_service import UserService
 from datetime import datetime
+from utils.json_encoder import CustomJSONProvider
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-
+app.json = CustomJSONProvider(app)  # Updated JSON provider configuration
 
 # Initialize database connection once
 db_conn = DatabaseConnections()
@@ -26,14 +27,14 @@ user_service = UserService()
 class SendMessageRequest(BaseModel):
     query: str
     conversation_id: Optional[str] = None
-    user_id: str = "dev-user"
+    user_id: str = "dev_user"
 
 class CreateNewChatRequest(BaseModel):
-    user_id: str = "dev-user"
+    user_id: str = "dev_user"
     title: Optional[str] = None
 
 class GetConversationRequest(BaseModel):
-    user_id: str = "dev-user"
+    user_id: str = "dev_user"
     conversation_id: str
 
 """
@@ -65,7 +66,7 @@ POST /api/chat/new
 
 Request body:
 {
-    "user_id": "dev-user",    # optional, defaults to "dev-user"
+    "user_id": "dev_user",    # optional, defaults to "dev_user"
     "title": "My Chat"        # optional, defaults to timestamp-based title
 }
 
@@ -74,13 +75,13 @@ Response:
     "conversation_id": "507f1f77bcf86cd799439011",
     "title": "My Chat",
     "created_at": "2024-02-20T15:30:00.000Z",
-    "user_id": "dev-user"
+    "user_id": "dev_user"
 }
 
 Example curl:
 curl -X POST http://localhost:5000/api/chat/new \
     -H "Content-Type: application/json" \
-    -d '{"title": "My Chat", "user_id": "dev-user"}'
+    -d '{"title": "My Chat", "user_id": "dev_user"}'
 """
 @app.route('/api/chat/new', methods=['POST'])
 def create_new_chat():
@@ -91,7 +92,15 @@ def create_new_chat():
             request_params.user_id, 
             request_params.title or default_title
         )
-        return jsonify(result), 200
+        
+        # Format the response manually to ensure proper serialization
+        response_data = {
+            'conversation_id': result['conversation_id'],
+            'title': result['title'],
+            'created_at': result['created_at'].isoformat(),
+            'user_id': result['user_id']
+        }
+        return jsonify(response_data), 200
     except ValidationError as e:
         return jsonify({'error': e.errors()}), 400
     except Exception as e:
@@ -105,7 +114,7 @@ Request body:
 {
     "query": "Hello, how are you?",
     "conversation_id": "507f1f77bcf86cd799439011",  # optional
-    "user_id": "dev-user"                           # optional
+    "user_id": "dev_user"                           # optional
 }
 
 Response:
@@ -143,7 +152,7 @@ Get all conversations for a user
 GET /api/conversations?user_id=dev_user
 
 Query parameters:
-- user_id: string (optional, defaults to "dev-user")
+- user_id: string (optional, defaults to "dev_user")
 
 Response:
 {
@@ -161,11 +170,10 @@ Response:
 Example curl:
 curl "http://localhost:5000/api/conversations?user_id=dev_user"
 """
-
 @app.route('/api/conversations', methods=['GET'])
 def get_user_conversations():
     try:
-        user_id = request.args.get('user_id', 'dev-user')
+        user_id = request.args.get('user_id', 'dev_user')
         conversations = message_controller.message_service.get_conversations(user_id)
         
         formatted_conversations = [
@@ -190,7 +198,7 @@ Path parameters:
 - conversation_id: string (required)
 
 Query parameters:
-- user_id: string (optional, defaults to "dev-user")
+- user_id: string (optional, defaults to "dev_user")
 
 Response:
 {
@@ -215,7 +223,7 @@ curl "http://localhost:5000/api/conversations/507f1f77bcf86cd799439011/messages?
 @app.route('/api/conversations/<conversation_id>/messages', methods=['GET'])
 def get_conversation_messages(conversation_id):
     try:
-        user_id = request.args.get('user_id', 'dev-user')
+        user_id = request.args.get('user_id', 'dev_user')
         messages = message_controller.message_service.get_conversation_history(conversation_id)
         
         formatted_messages = [

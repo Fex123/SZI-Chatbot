@@ -3,12 +3,16 @@ from config import Config
 from db.message_service import MessageService
 from db.user_service import UserService
 
+"""
+Message Controller class
+Responsible for making requests to Dify API
+"""
 class MessageController:
     def __init__(self):
         self.message_service = MessageService()
         self.user_service = UserService()
 
-    def send_message_to_dify(self, query, conversation_id=None, user_id="dev-user"):
+    def send_message_to_dify(self, query, conversation_id, user_id):
         # Ensure user exists
         user = self.user_service.get_user(user_id)
         if not user:
@@ -47,8 +51,13 @@ class MessageController:
         }
 
     def create_new_chat(self, user_id, title=None):
+        # Create conversation first
         conversation = self.message_service.create_conversation(user_id, title)
-        self.user_service.add_conversation(user_id, conversation['conversation_id'])
+        
+        # Only add to user if it's a new conversation
+        if conversation.get('_id'):  # New conversation was created
+            self.user_service.add_conversation(user_id, conversation['conversation_id'])
+            
         return conversation
 
     def get_user_chat_history(self, conversation_id, user_id):
