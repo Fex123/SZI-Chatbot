@@ -2,6 +2,9 @@ from db_connections import DatabaseConnections
 from datetime import datetime
 from bson import ObjectId
 
+#TODO: Fix issue / bug where if a new conversation is created (via endpoint ) without having an existing chat via send, 
+# the conversation is not saved to the user's conversation list in the database
+
 """
 MessageService class
 Responsible for handling message operations in the database
@@ -11,29 +14,53 @@ class MessageService:
         db = DatabaseConnections().get_mongodb()
         self.messages_collection = db.messages
 
-    def save_message(self, conversation_id, user_message, ai_response):
-        message_doc = {
-            'conversation_id': conversation_id,
-            'messages': [
-                {'role': 'user', 'content': user_message},
-                {'role': 'assistant', 'content': ai_response}
-            ],
-            'timestamp': datetime.now()
-        }
-        return self.messages_collection.insert_one(message_doc)
-    
+    def save_message(self, conversation_id, user_message, ai_response, user_id):
+        now = datetime.now()
+        message_pair = [
+            {'role': 'user', 'content': user_message},
+            {'role': 'assistant', 'content': ai_response}
+        ]
+        
+        # Try to find existing conversation
+        existing_conv = self.messages_collection.find_one({'conversation_id': conversation_id})
+        
+        if existing_conv:
+            # Update existing conversation with new messages
+            result = self.messages_collection.update_one(
+                {'conversation_id': conversation_id},
+                {
+                    '$push': {'messages': {'$each': message_pair}},
+                    '$set': {'updated_at': now}
+                }
+            )
+        else:
+            # Create new conversation document
+            message_doc = {
+                'conversation_id': conversation_id,
+                'user_id': user_id,  # Add user_id to new conversations
+                'messages': message_pair,
+                'timestamp': now,
+                'updated_at': now,
+                'title': f"Chat about: {user_message[:30]}..."
+            }
+            result = self.messages_collection.insert_one(message_doc)
+        
+        return result
+
     def load_message(self, conversation_id):
         return self.messages_collection.find_one({'conversation_id': conversation_id})
 
     def get_conversation_history(self, conversation_id):
-        return self.messages_collection.find(
+        # Update to return single conversation with all messages
+        conversation = self.messages_collection.find_one(
             {'conversation_id': conversation_id},
             {
                 'messages': 1,
                 'timestamp': 1,
                 '_id': 0
             }
-        ).sort('timestamp', 1)
+        )
+        return [conversation] if conversation else []
 
     def create_conversation(self, user_id, title=None):
         conversation_id = str(ObjectId())
@@ -60,14 +87,18 @@ class MessageService:
         return conversation_doc
 
     def get_conversations(self, user_id):
+        """
+        Get all conversations for a user with their details
+        Returns cursor of conversations with id, title, and timestamps
+        """
         return self.messages_collection.find(
             {'user_id': user_id},
             {
+                '_id': 0,
                 'conversation_id': 1,
                 'title': 1,
                 'created_at': 1,
-                'updated_at': 1,
-                '_id': 0
+                'updated_at': 1
             }
         ).sort('created_at', -1)
 
@@ -76,3 +107,21 @@ class MessageService:
             {'conversation_id': conversation_id},
             {'$set': {'title': new_title, 'updated_at': datetime.now()}}
         )
+
+    def validate_conversation(self, conversation_id, user_id):
+        """
+        Validates if a conversation exists and belongs to the user
+        Returns the conversation if valid, None if empty ID, raises Exception if invalid
+        """
+        if not conversation_id or conversation_id.strip() == "":
+            return None
+            
+        conversation = self.messages_collection.find_one({
+            'conversation_id': conversation_id,
+            'user_id': user_id
+        })
+        
+        if not conversation:
+            raise ValueError(f"Conversation {conversation_id} not found or does not belong to user {user_id}")
+            
+        return conversation

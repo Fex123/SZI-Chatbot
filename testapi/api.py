@@ -61,52 +61,6 @@ def home():
     return "Welcome to the chat API!"
 
 """
-Create a new chat conversation
-POST /api/chat/new
-
-Request body:
-{
-    "user_id": "dev_user",    # optional, defaults to "dev_user"
-    "title": "My Chat"        # optional, defaults to timestamp-based title
-}
-
-Response:
-{
-    "conversation_id": "507f1f77bcf86cd799439011",
-    "title": "My Chat",
-    "created_at": "2024-02-20T15:30:00.000Z",
-    "user_id": "dev_user"
-}
-
-Example curl:
-curl -X POST http://localhost:5000/api/chat/new \
-    -H "Content-Type: application/json" \
-    -d '{"title": "My Chat", "user_id": "dev_user"}'
-"""
-@app.route('/api/chat/new', methods=['POST'])
-def create_new_chat():
-    try:
-        request_params = CreateNewChatRequest(**request.json or {})
-        default_title = f"New Chat {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-        result = message_controller.create_new_chat(
-            request_params.user_id, 
-            request_params.title or default_title
-        )
-        
-        # Format the response manually to ensure proper serialization
-        response_data = {
-            'conversation_id': result['conversation_id'],
-            'title': result['title'],
-            'created_at': result['created_at'].isoformat(),
-            'user_id': result['user_id']
-        }
-        return jsonify(response_data), 200
-    except ValidationError as e:
-        return jsonify({'error': e.errors()}), 400
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-"""
 Send a message to the chatbot
 POST /api/chat/send
 
@@ -132,50 +86,67 @@ curl -X POST http://localhost:5000/api/chat/send \
 def send_message():
     try:
         data = request.json
+        # Convert empty string conversation_id to None
+        if 'conversation_id' in data and not data['conversation_id']:
+            data['conversation_id'] = None
+            
         request_params = SendMessageRequest(**data)
 
+        # Don't validate conversation for new chats
+        conversation_id = request_params.conversation_id
+        if conversation_id:
+            try:
+                conversation = message_controller.message_service.validate_conversation(
+                    conversation_id,
+                    request_params.user_id
+                )
+                if not conversation:
+                    conversation_id = None
+            except ValueError:
+                conversation_id = None
+
+        # Send message to Dify
         result = message_controller.send_message_to_dify(
             query=request_params.query,
-            conversation_id=request_params.conversation_id,
+            conversation_id=conversation_id,
             user_id=request_params.user_id
         )
+
+        # If this was a new conversation, set the title
+        if not conversation_id and result.get('conversation_id'):
+            default_title = f"Chat about: {request_params.query[:30]}..."
+            message_controller.message_service.update_conversation_title(
+                result['conversation_id'],
+                default_title
+            )
 
         return jsonify(result), 200
 
     except ValidationError as e:
         return jsonify({'error': e.errors()}), 400
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-"""
-Get all conversations for a user
-GET /api/conversations?user_id=dev_user
 
-Query parameters:
-- user_id: string (optional, defaults to "dev_user")
-
-Response:
-{
-    "conversations": [
-        {
-            "id": "507f1f77bcf86cd799439011",
-            "title": "My Chat",
-            "created_at": "2024-02-20T15:30:00.000Z",
-            "updated_at": "2024-02-20T15:35:00.000Z"
-        },
-        ...
-    ]
-}
-
-Example curl:
-curl "http://localhost:5000/api/conversations?user_id=dev_user"
-"""
 @app.route('/api/conversations', methods=['GET'])
 def get_user_conversations():
     try:
         user_id = request.args.get('user_id', 'dev_user')
-        conversations = message_controller.message_service.get_conversations(user_id)
         
+        # First check if user exists and get their conversations
+        user = user_service.get_user(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Get conversations from messages collection using conversation IDs
+        conversations = message_controller.message_service.get_conversations(user_id)
+        conversations_list = list(conversations)  # Convert cursor to list
+        
+        if not conversations_list:
+            return jsonify({'conversations': []}), 200
+            
         formatted_conversations = [
             ConversationResponse(
                 id=conv['conversation_id'],
@@ -183,10 +154,11 @@ def get_user_conversations():
                 created_at=conv['created_at'],
                 updated_at=conv.get('updated_at')
             ).model_dump()
-            for conv in conversations
+            for conv in conversations_list
         ]
         
         return jsonify({'conversations': formatted_conversations}), 200
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

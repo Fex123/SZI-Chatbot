@@ -13,42 +13,60 @@ class MessageController:
         self.user_service = UserService()
 
     def send_message_to_dify(self, query, conversation_id, user_id):
-        # Ensure user exists
-        user = self.user_service.get_user(user_id)
-        if not user:
-            self.user_service.create_user(user_id)
+        try:
+            # Check if this is part of an existing conversation
+            existing_conv = None
+            if conversation_id:
+                existing_conv = self.message_service.load_message(conversation_id)
 
-        payload = {
-            "inputs": {},
-            "query": query,
-            "response_mode": "blocking",
-            "conversation_id": conversation_id or "",
-            "user": user_id
-        }
+            payload = {
+                "inputs": {},
+                "query": query,
+                "response_mode": "blocking",
+                "conversation_id": existing_conv['conversation_id'] if existing_conv else None,
+                "user": user_id
+            }
 
-        response = requests.post(
-            f"{Config.DIFY_URL}/chat-messages",
-            headers=Config.DIFY_HEADERS,
-            json=payload
-        )
+            print(f"Sending request to Dify with payload: {payload}")
 
-        if response.status_code != 200:
-            raise Exception(f"Dify API error: {response.status_code}")
+            response = requests.post(
+                f"{Config.DIFY_URL}/chat-messages",
+                headers=Config.DIFY_HEADERS,
+                json=payload
+            )
 
-        response_data = response.json()
-        new_conversation_id = response_data.get("conversation_id")
-        ai_response = response_data.get("answer", "No response received.")
+            if response.status_code != 200:
+                print(f"Dify API error response: {response.text}")
+                raise Exception(f"Dify API error: {response.status_code}. Details: {response.text}")
 
-        # Save to database
-        self.message_service.save_message(new_conversation_id, query, ai_response)
+            response_data = response.json()
+            new_conversation_id = response_data.get("conversation_id")
+            ai_response = response_data.get("answer", "No response received.")
 
-        if new_conversation_id:
-            self.user_service.add_conversation(user_id, new_conversation_id)
+            # Use existing conversation_id if available, otherwise use new one
+            final_conversation_id = conversation_id or new_conversation_id
 
-        return {
-            'conversation_id': new_conversation_id,
-            'response': ai_response
-        }
+            if final_conversation_id and ai_response:
+                # Save message to database
+                self.message_service.save_message(
+                    final_conversation_id,
+                    query,
+                    ai_response,
+                    user_id
+                )
+                
+                # Only add to user's conversations if it's a new conversation
+                if not existing_conv:
+                    self.user_service.add_conversation(user_id, final_conversation_id)
+
+            return {
+                'conversation_id': final_conversation_id,
+                'response': ai_response
+            }
+
+        except requests.exceptions.RequestException as e:
+            print(f"Request error: {str(e)}")
+            raise Exception(f"Failed to communicate with Dify API: {str(e)}")
 
     def create_new_chat(self, user_id, title=None):
         # Create conversation first
