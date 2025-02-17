@@ -14,6 +14,11 @@ class MessageController:
 
     def send_message_to_dify(self, query, conversation_id, user_id):
         try:
+            # Ensure user exists first
+            user = self.user_service.get_user(user_id)
+            if not user:
+                self.user_service.create_user(user_id)
+
             # Check if this is part of an existing conversation
             existing_conv = None
             if conversation_id:
@@ -47,7 +52,7 @@ class MessageController:
             final_conversation_id = conversation_id or new_conversation_id
 
             if final_conversation_id and ai_response:
-                # Save message to database
+                # Save message and ensure conversation is linked to user
                 self.message_service.save_message(
                     final_conversation_id,
                     query,
@@ -55,9 +60,8 @@ class MessageController:
                     user_id
                 )
                 
-                # Only add to user's conversations if it's a new conversation
-                if not existing_conv:
-                    self.user_service.add_conversation(user_id, final_conversation_id)
+                # Always try to add conversation to user's list
+                self.user_service.add_conversation(user_id, final_conversation_id)
 
             return {
                 'conversation_id': final_conversation_id,

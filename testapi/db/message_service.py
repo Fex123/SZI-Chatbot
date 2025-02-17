@@ -39,13 +39,13 @@ class MessageService:
                 'conversation_id': conversation_id,
                 'user_id': user_id,  # Add user_id to new conversations
                 'messages': message_pair,
-                'created_at': now,  # Add created_at timestamp
+                'created_at': now, 
                 'updated_at': now,
                 'title': f"Chat about: {user_message[:30]}..."
             }
             result = self.messages_collection.insert_one(message_doc)
         
-        return result
+        return conversation_id
 
     def load_message(self, conversation_id):
         return self.messages_collection.find_one({'conversation_id': conversation_id})
@@ -125,6 +125,23 @@ class MessageService:
             raise ValueError(f"Conversation {conversation_id} not found or does not belong to user {user_id}")
             
         return conversation
+
+    def process_message(self, query, conversation_id, user_id):
+        """
+        Process and validate a new message
+        Returns validated conversation_id or None if invalid
+        """
+        if not conversation_id or conversation_id.strip() == "":
+            return None
+            
+        try:
+            conversation = self.validate_conversation(conversation_id, user_id)
+            if not conversation:
+                return None
+        except ValueError:
+            return None
+            
+        return conversation_id
 
     def get_formatted_conversations(self, user_id):
         """

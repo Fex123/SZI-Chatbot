@@ -29,14 +29,6 @@ class SendMessageRequest(BaseModel):
     conversation_id: Optional[str] = None
     user_id: str = "dev_user"
 
-class CreateNewChatRequest(BaseModel):
-    user_id: str = "dev_user"
-    title: Optional[str] = None
-
-class GetConversationRequest(BaseModel):
-    user_id: str = "dev_user"
-    conversation_id: str
-
 """
     Response Classes:
 """
@@ -86,25 +78,17 @@ curl -X POST http://localhost:5000/api/chat/send \
 def send_message():
     try:
         data = request.json
-        #TODO: Find a better way to handle empty strings, preferably in service class
-        # Convert empty string conversation_id to None
         if 'conversation_id' in data and not data['conversation_id']:
             data['conversation_id'] = None
             
         request_params = SendMessageRequest(**data)
 
-        # Validate conversation_id if provided
-        conversation_id = request_params.conversation_id
-        if conversation_id:
-            try:
-                conversation = message_controller.message_service.validate_conversation(
-                    conversation_id,
-                    request_params.user_id
-                )
-                if not conversation:
-                    conversation_id = None
-            except ValueError:
-                conversation_id = None
+        # Process message using service
+        conversation_id = message_controller.message_service.process_message(
+            request_params.query,
+            request_params.conversation_id,
+            request_params.user_id
+        )
 
         # Send message to Dify
         result = message_controller.send_message_to_dify(

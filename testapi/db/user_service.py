@@ -22,6 +22,12 @@ class UserService:
         return self.users_collection.find_one({'user_id': user_id})
 
     def add_conversation(self, user_id, conversation_id):
+        # Create user if doesn't exist
+        user = self.get_user(user_id)
+        if not user:
+            self.create_user(user_id)
+            
+        # Add conversation to user's list
         return self.users_collection.update_one(
             {'user_id': user_id},
             {'$addToSet': {'conversations': conversation_id}}
