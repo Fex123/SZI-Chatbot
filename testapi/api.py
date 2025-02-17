@@ -86,13 +86,14 @@ curl -X POST http://localhost:5000/api/chat/send \
 def send_message():
     try:
         data = request.json
+        #TODO: Find a better way to handle empty strings, preferably in service class
         # Convert empty string conversation_id to None
         if 'conversation_id' in data and not data['conversation_id']:
             data['conversation_id'] = None
             
         request_params = SendMessageRequest(**data)
 
-        # Don't validate conversation for new chats
+        # Validate conversation_id if provided
         conversation_id = request_params.conversation_id
         if conversation_id:
             try:
@@ -112,7 +113,7 @@ def send_message():
             user_id=request_params.user_id
         )
 
-        # If this was a new conversation, set the title
+        # Set default title for new conversations
         if not conversation_id and result.get('conversation_id'):
             default_title = f"Chat about: {request_params.query[:30]}..."
             message_controller.message_service.update_conversation_title(
@@ -130,36 +131,45 @@ def send_message():
         return jsonify({'error': str(e)}), 500
 
 
+"""
+Get all conversations for a user
+GET /api/conversations?user_id=dev_user
+
+Query parameters:
+- user_id: string (optional, defaults to "dev_user")
+
+Response:
+{
+    "conversations": [
+        {
+            "id": "507f1f77bcf86cd799439011",
+            "title": "My Chat",
+            "created_at": "2024-02-20T15:30:00.000Z",
+            "updated_at": "2024-02-20T15:35:00.000Z"
+        },
+        ...
+    ]
+}
+
+Example curl:
+curl "http://localhost:5000/api/conversations?user_id=dev_user"
+"""
 @app.route('/api/conversations', methods=['GET'])
 def get_user_conversations():
     try:
         user_id = request.args.get('user_id', 'dev_user')
         
-        # First check if user exists and get their conversations
+        # First check if user exists
         user = user_service.get_user(user_id)
         if not user:
             return jsonify({'error': 'User not found'}), 404
 
-        # Get conversations from messages collection using conversation IDs
-        conversations = message_controller.message_service.get_conversations(user_id)
-        conversations_list = list(conversations)  # Convert cursor to list
-        
-        if not conversations_list:
-            return jsonify({'conversations': []}), 200
-            
-        formatted_conversations = [
-            ConversationResponse(
-                id=conv['conversation_id'],
-                title=conv['title'],
-                created_at=conv['created_at'],
-                updated_at=conv.get('updated_at')
-            ).model_dump()
-            for conv in conversations_list
-        ]
-        
-        return jsonify({'conversations': formatted_conversations}), 200
+        # Get formatted conversations from service
+        conversations = message_controller.message_service.get_formatted_conversations(user_id)
+        return jsonify({'conversations': conversations}), 200
         
     except Exception as e:
+        print(f"Error in get_user_conversations: {e}")
         return jsonify({'error': str(e)}), 500
 
 """

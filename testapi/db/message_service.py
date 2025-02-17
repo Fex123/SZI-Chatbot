@@ -17,8 +17,8 @@ class MessageService:
     def save_message(self, conversation_id, user_message, ai_response, user_id):
         now = datetime.now()
         message_pair = [
-            {'role': 'user', 'content': user_message},
-            {'role': 'assistant', 'content': ai_response}
+            {'role': 'user', 'content': user_message, 'timestamp': now},
+            {'role': 'assistant', 'content': ai_response, 'timestamp': now}
         ]
         
         # Try to find existing conversation
@@ -39,7 +39,7 @@ class MessageService:
                 'conversation_id': conversation_id,
                 'user_id': user_id,  # Add user_id to new conversations
                 'messages': message_pair,
-                'timestamp': now,
+                'created_at': now,  # Add created_at timestamp
                 'updated_at': now,
                 'title': f"Chat about: {user_message[:30]}..."
             }
@@ -125,3 +125,26 @@ class MessageService:
             raise ValueError(f"Conversation {conversation_id} not found or does not belong to user {user_id}")
             
         return conversation
+
+    def get_formatted_conversations(self, user_id):
+        """
+        Get and format all conversations for a user
+        Returns list of formatted conversation dictionaries
+        """
+        conversations = self.get_conversations(user_id)
+        formatted_conversations = []
+        
+        for conv in conversations:
+            try:
+                formatted_conv = {
+                    'id': conv.get('conversation_id'),
+                    'title': conv.get('title', 'Untitled Chat'),
+                    'created_at': conv.get('created_at', datetime.now()),
+                    'updated_at': conv.get('updated_at')
+                }
+                formatted_conversations.append(formatted_conv)
+            except Exception as e:
+                print(f"Error formatting conversation: {e}")
+                continue
+                
+        return formatted_conversations
