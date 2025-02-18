@@ -2,9 +2,7 @@ from db_connections import DatabaseConnections
 from datetime import datetime
 from bson import ObjectId
 
-#TODO: Fix issue / bug where if a new conversation is created (via endpoint ) without having an existing chat via send, 
-# the conversation is not saved to the user's conversation list in the database
-
+# TODO: Refactor this class to be more modular and clean
 """
 MessageService class
 Responsible for handling message operations in the database
