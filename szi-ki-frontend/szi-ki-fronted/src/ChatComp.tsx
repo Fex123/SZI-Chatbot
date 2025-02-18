@@ -50,11 +50,15 @@ class ChatComp extends Component<ChatProps, ChatState> {
   }
 
   fetchAndAddMessages = async (chat: Chat) => {
-    const messages = await fetchConversationMessages(chat.conversation_id);
+    
+    try {
+    let messages = await fetchConversationMessages(chat.conversation_id);
     chat.messages = messages;
     chat.registered = true;
     this.setState({}); 
-
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    } 
   };
 
   handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
