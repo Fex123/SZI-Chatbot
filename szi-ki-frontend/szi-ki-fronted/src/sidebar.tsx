@@ -68,7 +68,7 @@ class Sidebar extends Component<SidebarProps, SidebarState> {
         <div className="sidebar-top-logo">
           <img src={logo} alt="Logo" className="dhbw-logo" title="Create new chat"/>
         </div>
-        <div className="sidebar-top-bar" onClick={() => this.setChat(new Chat("New Chat", "", [], new Date(), false))}>
+        <div className="sidebar-top-bar" onClick={() => this.setChat(new Chat("", "", [], new Date(), true))}>
           <button className='dark-mode-button' >
             {newChatSvg}
           </button>

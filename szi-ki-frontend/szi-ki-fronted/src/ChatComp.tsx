@@ -1,26 +1,7 @@
 import React, { Component } from 'react';
-import { Chat } from './helper';
+import { Chat, fetchConversationMessages, sendMessage } from './helper';
 import './App.css';
 import DarkModeToggle from './Dmtoggle';
-
-/*
-ASK COPILOT:
-
-This is the Class Chat with its constructor:
-
-export class Chat {
-    private _messages: string[];
-    title: string;
-    conversation_id: string;
-    date: Date;
-    registered: boolean = false;
-
-  
-    constructor(conversation_id: string, title: string, messages: string[], date: Date, registered: boolean = false) {
-
-If the "chat" Prop is changed and the value for registered is "false"
-
-*/
 
 interface ChatProps {
   chat: Chat | null;
@@ -56,12 +37,25 @@ class ChatComp extends Component<ChatProps, ChatState> {
 
   constructor(props: ChatProps) {
     super(props);
-    //console.log('X1 Chat selected in Chatcomp :', this.props.chat);
     this.state = {
       inputText: '',
       isLoading: false,
     };
   }
+
+  componentDidUpdate(prevProps: ChatProps) {
+    if (this.props.chat && this.props.chat !== prevProps.chat && !this.props.chat.registered && this.props.chat.conversation_id !== "") {
+      this.fetchAndAddMessages(this.props.chat);
+    }
+  }
+
+  fetchAndAddMessages = async (chat: Chat) => {
+    const messages = await fetchConversationMessages(chat.conversation_id);
+    chat.messages = messages;
+    chat.registered = true;
+    this.setState({}); 
+
+  };
 
   handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     this.setState({ inputText: event.target.value }, this.adjustTextareaHeight);
@@ -70,12 +64,12 @@ class ChatComp extends Component<ChatProps, ChatState> {
   adjustTextareaHeight = () => {
     const textarea = this.textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto'; // Reset height to recalculate
-      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px'; // Grow up to max-height
+      textarea.style.height = 'auto'; 
+      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px'; 
     }
   };
 
-  handleInputButtonClick = () => {
+  handleInputButtonClick = async () => {
     const { chat } = this.props;
     const { inputText } = this.state;
     const trimmedInput = inputText.trim();
@@ -86,13 +80,26 @@ class ChatComp extends Component<ChatProps, ChatState> {
     if (chat) {
       chat.messages.push(trimmedInput);
       this.setState({ isLoading: true });
-      //TODO: Response verarbeitung
-      if(chat.registered == false) {
+
+      try {
+        const response = await sendMessage(chat.conversation_id, trimmedInput);
+
+        if(chat.conversation_id == ""){
+          chat.conversation_id = response.conversation_id;
+          chat.title = trimmedInput;
+          this.props.addChat(chat);
+        }
+
         chat.registered = true;
-        chat.title = "Test new Chat"; //TODO: Get title from response
-        chat.date = new Date(); //TODO: Get date from response
-        this.props.addChat(chat)
-      } 
+
+        chat.messages.push(response.response);
+        
+      } catch (error) {
+        console.error('Error sending message:', error);
+      } finally {
+        this.setState({ isLoading: false });
+      }
+    
     }
 
     this.setState({
@@ -101,13 +108,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
       this.adjustTextareaHeight(); // Reset the textarea height after clearing the input
     });
 
-    // Simulate response delay
-    setTimeout(() => {
-      this.setState({ isLoading: false });
-      if (chat) {
-        chat.messages.push("This is a simulated response."); // Simulated response
-      }
-    }, 2000); // Simulate a 2-second delay
+      
   };
 
   render() {
