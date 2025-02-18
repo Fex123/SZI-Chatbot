@@ -182,11 +182,11 @@ svg {
 
 
 .container .dark-mode-button svg {
-  fill: #000000; /* Default color for light mode */
+  fill: #000000; 
 }
 
 .container.dark .dark-mode-button svg {
-  fill: #ffffff; /* Default color for light mode */
+  fill: #ffffff; 
 }
 
 .chat-text-input-wrapper {
@@ -202,12 +202,22 @@ svg {
   width: 100%;
   min-height: 60px;
   max-height: 150px;
-  overflow-y: auto; /* Adds a vertical scrollbar when the content exceeds the max height */
+  overflow-y: auto; 
   resize: none;
   background-color: #00000000;
   border: #00000000;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 1em;
+}
+
+
+.chat-text-input {
+  color: #000; 
+}
+
+
+.container.dark .chat-text-input {
+  color: #fff; 
 }
 
 .chat-text-input:focus {

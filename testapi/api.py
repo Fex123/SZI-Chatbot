@@ -41,7 +41,7 @@ class ConversationResponse(BaseModel):
 class MessageResponse(BaseModel):
     role: str
     content: str
-    timestamp: datetime
+    created_at: datetime
 
 """
 Root endpoint
@@ -99,7 +99,7 @@ def send_message():
 
         # Set default title for new conversations
         if not conversation_id and result.get('conversation_id'):
-            default_title = f"Chat about: {request_params.query[:30]}..."
+            default_title = f"{request_params.query}"
             message_controller.message_service.update_conversation_title(
                 result['conversation_id'],
                 default_title
@@ -172,12 +172,12 @@ Response:
         {
             "role": "user",
             "content": "Hello, how are you?",
-            "timestamp": "2024-02-20T15:30:00.000Z"
+            "created_at": "2024-02-20T15:30:00.000Z"
         },
         {
             "role": "assistant",
             "content": "Hello! I'm doing well, thank you for asking. How can I help you today?",
-            "timestamp": "2024-02-20T15:30:01.000Z"
+            "created_at": "2024-02-20T15:30:01.000Z"
         },
         ...
     ]
@@ -196,7 +196,7 @@ def get_conversation_messages(conversation_id):
             MessageResponse(
                 role=m['role'],
                 content=m['content'],
-                timestamp=msg['timestamp']
+                created_at=msg['created_at']
             ).model_dump()
             for msg in messages
             for m in msg['messages']

@@ -1,5 +1,5 @@
-const API_URL = 'http://localhost:5000';
-const API_user = "dev-user";
+const API_URL = 'http://127.0.0.1:5000';
+const API_user = "dev_user";
 
 export function testConnection() {
   fetch(API_URL)
@@ -30,18 +30,31 @@ export const fetchConversationTitles = async () => {
 }
 
 export const fetchConversationMessages = async (conversation_id: string) => { 
-  const response = await fetch(`${API_URL}/api/chat/${conversation_id}/messages?user_id=${API_user}`, {
+  const response = await fetch(`${API_URL}/api/conversations/${conversation_id}/messages?user_id=${API_user}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
     }
   });
   const data = await response.json();
-  const messages = data.data.map((message: { answer: string; query: string }) => ({
-    answer: message.answer,
-    query: message.query
-  }));
+  const messages = data.messages.map((message: { content: string }) => message.content);
+  console.log('Fetched messages:', messages);
   return messages;
+}
+
+export const sendMessage = async (conversation_id: string, message: string) => {
+  const response = await fetch(`${API_URL}/api/chat/send`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }, 
+    body: JSON.stringify({
+      query: message,
+      conversation_id: conversation_id
+    })
+  });
+  const data = await response.json();
+  return data;
 }
 
 
