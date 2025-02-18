@@ -1,0 +1,30 @@
+# Basis-Image für Node.js
+FROM node:22.14.0 AS build
+
+# Arbeitsverzeichnis setzen
+WORKDIR /app
+
+# Abhängigkeiten kopieren und installieren
+COPY package.json package-lock.json ./
+RUN npm install --frozen-lockfile
+
+# Quellcode kopieren
+COPY . .
+
+# React-App bauen
+RUN npm run build
+
+# Basis-Image für Apache
+FROM httpd:latest
+
+# Kopiere die eigene Apache-Konfiguration
+COPY httpd.conf /usr/local/apache2/htdocs
+    
+# Kopiere die gebaute React-App in das DocumentRoot von Apache
+COPY --from=build /app/dist/ /usr/local/apache2/htdocs/
+    
+# Exponiere Port 80
+EXPOSE 3104
+    
+# Starte Apache im Vordergrund
+CMD ["httpd-foreground"]
