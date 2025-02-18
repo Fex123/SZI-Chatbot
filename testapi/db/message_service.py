@@ -56,7 +56,7 @@ class MessageService:
             {'conversation_id': conversation_id},
             {
                 'messages': 1,
-                'timestamp': 1,
+                'created_at': 1,
                 '_id': 0
             }
         )
