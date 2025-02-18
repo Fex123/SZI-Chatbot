@@ -26,7 +26,7 @@ const exampleChats = [
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
-  const [chats, setChats] = useState<Chat[]>(exampleChats);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat>(new Chat("", "", [], new Date(), true));
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);

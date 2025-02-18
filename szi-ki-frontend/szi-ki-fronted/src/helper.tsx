@@ -1,5 +1,5 @@
-const API_URL = 'http://localhost:5000';
-const API_user = "dev-user";
+const API_URL = 'http://127.0.0.1:5000';
+const API_user = "dev_user";
 
 export function testConnection() {
   fetch(API_URL)
