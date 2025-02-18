@@ -172,12 +172,12 @@ Response:
         {
             "role": "user",
             "content": "Hello, how are you?",
-            "timestamp": "2024-02-20T15:30:00.000Z"
+            "created_at": "2024-02-20T15:30:00.000Z"
         },
         {
             "role": "assistant",
             "content": "Hello! I'm doing well, thank you for asking. How can I help you today?",
-            "timestamp": "2024-02-20T15:30:01.000Z"
+            "created_at": "2024-02-20T15:30:01.000Z"
         },
         ...
     ]
