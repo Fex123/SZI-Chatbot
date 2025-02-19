@@ -1,4 +1,4 @@
-const API_URL = 'http://127.0.0.1:5000';
+const API_URL = 'http://host.docker.internal:3104';
 const API_user = "dev_user";
 
 export function testConnection() {

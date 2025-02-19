@@ -207,4 +207,4 @@ def get_conversation_messages(conversation_id):
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=Config.DEBUG)
+    app.run(host= "0.0.0.0", port= 3104, debug=Config.DEBUG)
