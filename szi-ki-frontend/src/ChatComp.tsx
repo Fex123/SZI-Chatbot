@@ -81,6 +81,12 @@ class ChatComp extends Component<ChatProps, ChatState> {
       return;
     }
 
+    this.setState({
+      inputText: ''
+    }, () => {
+      this.adjustTextareaHeight();
+    });
+
     if (chat) {
       chat.messages.push(trimmedInput);
       this.setState({ isLoading: true });
@@ -106,11 +112,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
     
     }
 
-    this.setState({
-      inputText: ''
-    }, () => {
-      this.adjustTextareaHeight(); // Reset the textarea height after clearing the input
-    });
+    
 
       
   };
@@ -169,7 +171,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
               value={inputText}
               onChange={this.handleInputChange}
             />
-            <button className="send-button" onClick={this.handleInputButtonClick}>
+            <button className="send-button" onClick={this.handleInputButtonClick} disabled={isLoading}>
             <div className="icon-hover-wrapper">
               {sendSvg}
               </div></button>
