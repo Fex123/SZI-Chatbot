@@ -39,7 +39,6 @@ class MessageController:
                 headers=Config.DIFY_HEADERS,
                 json=payload
             )
-
             if response.status_code != 200:
                 print(f"Dify API error response: {response.text}")
                 raise Exception(f"Dify API error: {response.status_code}. Details: {response.text}")

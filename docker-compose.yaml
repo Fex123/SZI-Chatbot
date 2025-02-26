@@ -16,12 +16,6 @@ services:
       - mongodb_data:/data/db
     networks:
       - app_network
-  create-mongo-db:
-    build: 
-      context: ./testapi
-    depends_on:
-      - mongodb
-    command: bash -c "python create_collections.py"
   szi-ki-backend:
     build: 
       context: ./testapi
@@ -31,6 +25,8 @@ services:
       - "3104:3104"
     networks:
       - app_network
+    env_file:
+      - .env
 
 networks:
   app_network:
