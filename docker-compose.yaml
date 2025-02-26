@@ -5,6 +5,7 @@ services:
       context: ./szi-ki-frontend
     ports:
       - "3105:80"
+    command: ["/bin/bash", "-c", "httpd -D FOREGROUND"]
   mongodb:
     image: mongo:latest
     environment:
