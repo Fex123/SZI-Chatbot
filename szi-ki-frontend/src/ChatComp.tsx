@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Chat, fetchConversationMessages, sendMessage } from './helper';
 import './App.css';
 import DarkModeToggle from './Dmtoggle';
@@ -34,6 +35,8 @@ interface ChatState {
 
 class ChatComp extends Component<ChatProps, ChatState> {
   textareaRef = React.createRef<HTMLTextAreaElement>();
+  chatContentRef = React.createRef<HTMLDivElement>(); // Add this line
+
 
   constructor(props: ChatProps) {
     super(props);
@@ -59,6 +62,13 @@ class ChatComp extends Component<ChatProps, ChatState> {
     } catch (error) {
       console.error('Error fetching messages:', error);
     } 
+  };
+
+  handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.handleInputButtonClick();
+    }
   };
 
   handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -89,6 +99,8 @@ class ChatComp extends Component<ChatProps, ChatState> {
 
     if (chat) {
       chat.messages.push(trimmedInput);
+      this.scrollToBottom();
+
       this.setState({ isLoading: true });
 
       try {
@@ -103,6 +115,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
         chat.registered = true;
 
         chat.messages.push(response.response);
+        this.scrollToBottom();
         
       } catch (error) {
         console.error('Error sending message:', error);
@@ -112,9 +125,13 @@ class ChatComp extends Component<ChatProps, ChatState> {
     
     }
 
-    
+  };
 
-      
+  scrollToBottom = () => {
+    const chatContent = this.chatContentRef.current;
+    if (chatContent) {
+      chatContent.scrollTop = chatContent.scrollHeight - chatContent.clientHeight;
+    }
   };
 
   render() {
@@ -128,9 +145,9 @@ class ChatComp extends Component<ChatProps, ChatState> {
           <DarkModeToggle isDark={false} toggleDarkMode={this.props.toggleDarkmode} />
         </div>
 
-        <div className="chat-wrapper">
-          <div className="chat-content">
-            {chat && chat.messages.map((message, index) => (
+        <div className="chat-wrapper" ref={this.chatContentRef}>
+        <div className="chat-content">
+        {chat && chat.messages.map((message, index) => (
               <div className="chat-message-wrapper" key={index}>
                 {index % 2 !== 0 ? (
                   <div className="chat-profile-pic">
@@ -142,7 +159,11 @@ class ChatComp extends Component<ChatProps, ChatState> {
                   </div>
                 )}
                 <div className={index % 2 === 0 ? 'user-message' : 'bot-message'}>
-                  {message}
+                {index % 2 === 0 ? (
+                    message
+                  ) : (
+                    <ReactMarkdown>{message}</ReactMarkdown>
+                  )}
                 </div>
               </div>
             ))}
@@ -163,20 +184,22 @@ class ChatComp extends Component<ChatProps, ChatState> {
           </div>
         </div>
         <div className="chat-text-input-wrapper">
-          <div className="chat-input-box">
-            <textarea
-              ref={this.textareaRef}
-              className="chat-text-input"
-              placeholder="Frag mich etwas!"
-              value={inputText}
-              onChange={this.handleInputChange}
-            />
-            <button className="send-button" onClick={this.handleInputButtonClick} disabled={isLoading}>
-            <div className="icon-hover-wrapper">
-              {sendSvg}
-              </div></button>
-          </div>
-        </div>
+  <div className="chat-input-box">
+    <textarea
+      ref={this.textareaRef}
+      className="chat-text-input"
+      placeholder="Frag mich etwas!"
+      value={inputText}
+      onChange={this.handleInputChange}
+      onKeyDown={this.handleKeyDown} // Add this line
+    />
+    <button className="send-button" onClick={this.handleInputButtonClick} disabled={isLoading}>
+      <div className="icon-hover-wrapper">
+        {sendSvg}
+      </div>
+    </button>
+  </div>
+</div>
       </div>
     );
   }
