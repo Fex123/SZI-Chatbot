@@ -3,6 +3,8 @@ import ReactMarkdown from 'react-markdown';
 import { Chat, fetchConversationMessages, sendMessage } from './helper';
 import './App.css';
 import DarkModeToggle from './Dmtoggle';
+import ProfilePic from './UserProfile';
+
 
 interface ChatProps {
   chat: Chat | null;
@@ -26,6 +28,10 @@ const studentSvg = (
       <path className="st0" d="M256,346.831c-11.246,0-22.143-2.391-32.386-7.104L112.793,288.71v101.638c0,22.314,67.426,50.621,143.207,50.621c75.782,0,143.209-28.308,143.209-50.621V288.71l-110.827,51.017C278.145,344.44,267.25,346.831,256,346.831z"/>
     </g>
   </svg>
+);
+
+const profileSvg = (
+<svg className="profile-svg" height="30px" width="30px" fill="none" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 45.532 45.532" xmlSpace="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M22.766,0.001C10.194,0.001,0,10.193,0,22.766s10.193,22.765,22.766,22.765c12.574,0,22.766-10.192,22.766-22.765 S35.34,0.001,22.766,0.001z M22.766,6.808c4.16,0,7.531,3.372,7.531,7.53c0,4.159-3.371,7.53-7.531,7.53 c-4.158,0-7.529-3.371-7.529-7.53C15.237,10.18,18.608,6.808,22.766,6.808z M22.761,39.579c-4.149,0-7.949-1.511-10.88-4.012 c-0.714-0.609-1.126-1.502-1.126-2.439c0-4.217,3.413-7.592,7.631-7.592h8.762c4.219,0,7.619,3.375,7.619,7.592 c0,0.938-0.41,1.829-1.125,2.438C30.712,38.068,26.911,39.579,22.761,39.579z"></path> </g> </g></svg>
 );
 
 interface ChatState {
@@ -142,7 +148,10 @@ class ChatComp extends Component<ChatProps, ChatState> {
       <div className="content">
         <div className="chat-top-bar">
           <p>SZI Assistent</p>
+          <div className="chat-top-bar-buttons">
           <DarkModeToggle isDark={false} toggleDarkMode={this.props.toggleDarkmode} />
+          <ProfilePic />
+          </div>
         </div>
 
         <div className="chat-wrapper" ref={this.chatContentRef}>

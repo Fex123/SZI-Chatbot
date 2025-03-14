@@ -129,7 +129,14 @@ html, body {
   stroke: #00000000; 
 }
 
-.container.dark .ki-svg path, .container.dark .student-svg path, .container.dark .send-svg path, .container.dark .plus-svg path {
+.profile-svg {
+  fill: #000000; 
+  stroke: #00000000; 
+}
+
+.container.dark .ki-svg path, .container.dark .profile-svg,
+ .container.dark .student-svg path, .container.dark .send-svg path,
+  .container.dark .plus-svg path {
   fill: #fff; 
   stroke: #00000000; 
 }
@@ -152,10 +159,10 @@ html, body {
 .dark-mode-button {
   background-color: #00000000;
   border:#00000000;
-  padding-right: 20px;
   max-height: 33px;
   display: flex;
   align-items: center;
+  padding-top: 0px;
 }
 
 .sidebar .dark-mode-button {
@@ -273,6 +280,21 @@ svg {
   font-size: 0.95em;
   display: flex;
   transition: background-color 0.1s, color 0.1s; 
+}
+
+.profile-pic-circle {
+  width: min-content;
+  height: min-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-top-bar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 5px; 
+  padding-right: 20px;
 }
 
 .dhbw-logo {
