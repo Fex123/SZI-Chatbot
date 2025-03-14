@@ -1,7 +1,7 @@
 import requests
 from config import Config
-from db.message_service import MessageService
-from db.user_service import UserService
+from services.message_service import MessageService 
+from services.user_service import UserService      
 
 """
 Message Controller class
