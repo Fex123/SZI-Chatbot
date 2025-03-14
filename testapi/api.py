@@ -7,11 +7,9 @@ from controllers.message_controller import MessageController
 from config import Config
 from db.user_service import UserService
 from datetime import datetime
-from utils.json_encoder import CustomJSONProvider
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-app.json = CustomJSONProvider(app)  # Updated JSON provider configuration
 
 # Initialize database connection once
 db_conn = DatabaseConnections()
