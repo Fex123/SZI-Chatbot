@@ -11,6 +11,7 @@ from utils.bcrypt_singleton import BcryptSingleton
 from controllers.auth_controller import AuthController
 from controllers.message_controller import MessageController
 from services.validation_service import ValidationService
+from services.user_service import UserService
 from services.message_service import MessageService
 
 app = Flask(__name__)
