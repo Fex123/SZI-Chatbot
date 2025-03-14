@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_bcrypt import Bcrypt
 from pydantic import BaseModel, ValidationError
 from typing import Optional
 from db_connections import DatabaseConnections
@@ -8,10 +7,13 @@ from controllers.message_controller import MessageController
 from config import Config
 from db.user_service import UserService
 from datetime import datetime
+from utils.bcrypt_singleton import BcryptSingleton
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-bcrypt = Bcrypt(app)  # Initialize Bcrypt
+CORS(app)
+
+# Initialize Bcrypt singleton with app
+BcryptSingleton.get_instance().init_bcrypt(app)
 
 # Initialize database connection once
 db_conn = DatabaseConnections()

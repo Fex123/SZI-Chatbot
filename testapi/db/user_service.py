@@ -1,8 +1,7 @@
 from db_connections import DatabaseConnections
 from datetime import datetime
 import uuid
-from flask_bcrypt import Bcrypt
-from flask import current_app
+from utils.bcrypt_singleton import BcryptSingleton
 
 """
 UserService class
@@ -12,7 +11,7 @@ class UserService:
     def __init__(self):
         db = DatabaseConnections().get_mongodb()
         self.users_collection = db.users
-        self.bcrypt = Bcrypt(current_app)
+        self.bcrypt = BcryptSingleton.get_instance().get_bcrypt()
 
     def create_user(self, username, password, display_name=None):
         """Create a new user with hashed password"""
