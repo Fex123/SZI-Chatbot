@@ -136,7 +136,7 @@ html, body {
 
 .container.dark .ki-svg path, .container.dark .profile-svg,
  .container.dark .student-svg path, .container.dark .send-svg path,
-  .container.dark .plus-svg path {
+  .container.dark .plus-svg path, .container.dark .profile-svg, .container.dark .modal-svg {
   fill: #fff; 
   stroke: #00000000; 
 }
@@ -288,6 +288,79 @@ svg {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.user-modal {
+  display: flex;
+  position: fixed;
+  z-index: 1;
+  right: 10px; 
+  top: 50px; 
+  width: auto;
+  height: auto;
+  background-color: rgba(0,0,0,0); 
+  justify-content: center;
+  align-items: center;
+  
+}
+
+.modal-user-info {
+  font-size: 0.95em;
+  color:#acacac;
+}
+
+
+.modal-content {
+  background-color: #f4f4f4;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #acacac;
+  width: 80%;
+  max-width: 600px;
+  border-radius: 20px;
+}
+
+.container.dark .modal-content {
+  background-color: #303030;
+  color: #fff;
+}
+
+.modal-button {
+  height: 1.5em;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #00000000;
+}
+
+.modal-button:hover {
+  background-color: #e0e0e0;
+}
+
+.container.dark .modal-button:hover {
+  background-color: #383838;
+  color: #fff;
+}
+
+.container.dark .modal-button {
+  
+  color: #fff;
+}
+
+.modal-svg path {
+  fill: #000000; 
+  stroke: #00000000; 
+}
+
+.signout-text {
+  
+    margin-left: 5px;
+    
 }
 
 .chat-top-bar-buttons {
