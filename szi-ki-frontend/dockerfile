@@ -15,16 +15,19 @@ COPY . .
 RUN npm run build
 
 # Basis-Image für Apache
-FROM httpd:latest
+FROM debian:stable-slim AS runtime
 
-# Kopiere die eigene Apache-Konfiguration
-COPY httpd.conf /usr/local/apache2/htdocs
-    
-# Kopiere die gebaute React-App in das DocumentRoot von Apache
-COPY --from=build /app/dist/ /usr/local/apache2/htdocs/
-    
+RUN apt-get update && apt-get install -y apache2 apache2-utils
+
+# Enable mod_rewrite module
+RUN a2enmod rewrite
+
+# Kopiere die gebaute React-App und die statischen Webserver-Dateien in das DocumentRoot von Apache
+COPY --from=build /app/dist/ /var/www/html/
+#COPY index.html /var/www/html/
+
 # Exponiere Port 80
-EXPOSE 3104
-    
+EXPOSE 3105
+
 # Starte Apache im Vordergrund
-CMD ["httpd-foreground"]
+CMD ["apache2ctl", "-D", "FOREGROUND"]
