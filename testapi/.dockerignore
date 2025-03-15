@@ -1,0 +1,3 @@
+venv/
+*.git
+node_modules/
