@@ -5,7 +5,6 @@ import './App.css';
 import DarkModeToggle from './Dmtoggle';
 import ProfilePic from './UserProfile';
 
-
 interface ChatProps {
   chat: Chat | null;
   toggleDarkmode: () => void;
@@ -43,7 +42,6 @@ class ChatComp extends Component<ChatProps, ChatState> {
   textareaRef = React.createRef<HTMLTextAreaElement>();
   chatContentRef = React.createRef<HTMLDivElement>(); // Add this line
 
-
   constructor(props: ChatProps) {
     super(props);
     this.state = {
@@ -59,15 +57,14 @@ class ChatComp extends Component<ChatProps, ChatState> {
   }
 
   fetchAndAddMessages = async (chat: Chat) => {
-    
     try {
-    let messages = await fetchConversationMessages(chat.conversation_id);
-    chat.messages = messages;
-    chat.registered = true;
-    this.setState({}); 
+      let messages = await fetchConversationMessages(chat.conversation_id);
+      chat.messages = messages;
+      chat.registered = true;
+      this.setState({});
     } catch (error) {
       console.error('Error fetching messages:', error);
-    } 
+    }
   };
 
   handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -84,15 +81,15 @@ class ChatComp extends Component<ChatProps, ChatState> {
   adjustTextareaHeight = () => {
     const textarea = this.textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto'; 
-      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px'; 
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
     }
   };
 
-  handleInputButtonClick = async () => {
+  handleInputButtonClick = async (inputText?: string) => {
     const { chat } = this.props;
-    const { inputText } = this.state;
-    const trimmedInput = inputText.trim();
+    const textToSend = inputText || this.state.inputText;
+    const trimmedInput = textToSend.trim();
     if (trimmedInput === '') {
       return;
     }
@@ -112,7 +109,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
       try {
         const response = await sendMessage(chat.conversation_id, trimmedInput);
 
-        if(chat.conversation_id == ""){
+        if (chat.conversation_id == "") {
           chat.conversation_id = response.conversation_id;
           chat.title = trimmedInput;
           this.props.addChat(chat);
@@ -122,15 +119,13 @@ class ChatComp extends Component<ChatProps, ChatState> {
 
         chat.messages.push(response.response);
         this.scrollToBottom();
-        
+
       } catch (error) {
         console.error('Error sending message:', error);
       } finally {
         this.setState({ isLoading: false });
       }
-    
     }
-
   };
 
   scrollToBottom = () => {
@@ -149,33 +144,44 @@ class ChatComp extends Component<ChatProps, ChatState> {
         <div className="chat-top-bar">
           <p>SZI Assistent</p>
           <div className="chat-top-bar-buttons">
-          <DarkModeToggle isDark={false} toggleDarkMode={this.props.toggleDarkmode} />
-          <ProfilePic />
+            <DarkModeToggle isDark={false} toggleDarkMode={this.props.toggleDarkmode} />
+            <ProfilePic />
           </div>
         </div>
 
         <div className="chat-wrapper" ref={this.chatContentRef}>
-        <div className="chat-content">
-        {chat && chat.messages.map((message, index) => (
-              <div className="chat-message-wrapper" key={index}>
-                {index % 2 !== 0 ? (
-                  <div className="chat-profile-pic">
-                    {kiSvg}
-                  </div>
-                ) : (
-                  <div className="chat-profile-pic">
-                    {studentSvg}
-                  </div>
-                )}
-                <div className={index % 2 === 0 ? 'user-message' : 'bot-message'}>
-                {index % 2 === 0 ? (
-                    message
+          <div className="chat-content">
+            {chat && chat.messages.length > 0 ? (
+              chat.messages.map((message, index) => (
+                <div className="chat-message-wrapper" key={index}>
+                  {index % 2 !== 0 ? (
+                    <div className="chat-profile-pic">
+                      {kiSvg}
+                    </div>
                   ) : (
-                    <ReactMarkdown>{message}</ReactMarkdown>
+                    <div className="chat-profile-pic">
+                      {studentSvg}
+                    </div>
                   )}
+                  <div className={index % 2 === 0 ? 'user-message' : 'bot-message'}>
+                    {index % 2 === 0 ? (
+                      message
+                    ) : (
+                      <ReactMarkdown>{message}</ReactMarkdown>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="no-messages">
+                <h1>Wie kann ich dir helfen?</h1>
+                <div className="example-questions">
+                  <div className="question-panel" onClick={() => this.handleInputButtonClick("Wie viele Seiten braucht meine 2. Projektarbeit?")}>Wie viele Seiten braucht meine 2. Projektarbeit?</div>
+                  <div className="question-panel" onClick={() => this.handleInputButtonClick("Welche Kapitel muss meine Projektarbeit enthalten?")}>Welche Kapitel muss meine Projektarbeit enthalten?</div>
+                  <div className="question-panel" onClick={() => this.handleInputButtonClick("Wie viele Credits bekomme ich für meine Bachelorarbeit?")}>Wie viele Credits bekomme ich für meine Bachelorarbeit?</div>
                 </div>
               </div>
-            ))}
+            )}
             {isLoading && (
               <div className="chat-message-wrapper">
                 <div className="chat-profile-pic">
@@ -193,22 +199,22 @@ class ChatComp extends Component<ChatProps, ChatState> {
           </div>
         </div>
         <div className="chat-text-input-wrapper">
-  <div className="chat-input-box">
-    <textarea
-      ref={this.textareaRef}
-      className="chat-text-input"
-      placeholder="Frag mich etwas!"
-      value={inputText}
-      onChange={this.handleInputChange}
-      onKeyDown={this.handleKeyDown} // Add this line
-    />
-    <button className="send-button" onClick={this.handleInputButtonClick} disabled={isLoading}>
-      <div className="icon-hover-wrapper">
-        {sendSvg}
-      </div>
-    </button>
-  </div>
-</div>
+          <div className="chat-input-box">
+            <textarea
+              ref={this.textareaRef}
+              className="chat-text-input"
+              placeholder="Frag mich etwas!"
+              value={inputText}
+              onChange={this.handleInputChange}
+              onKeyDown={this.handleKeyDown}
+            />
+            <button className="send-button" onClick={() => this.handleInputButtonClick()} disabled={isLoading}>
+              <div className="icon-hover-wrapper">
+                {sendSvg}
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

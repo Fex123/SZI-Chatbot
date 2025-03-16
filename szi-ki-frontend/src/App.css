@@ -114,6 +114,57 @@ html, body {
   color: #fff;
 }
 
+.no-messages {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.no-messages h1 {
+  font-size: 2.5em;
+  color: #333;
+}
+
+.container.dark .no-messages h1 {
+  color: #fff;
+}
+
+.example-questions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.question-panel {
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px;
+  width: 200px;
+  text-align: center;
+  font-size: 1em;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.1s, border-color 0.1s;
+}
+
+.question-panel:hover {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+}
+
+.container.dark .question-panel {
+  background-color: #303030;
+  border-color: #555;
+  color: #fff;
+}
+
+.container.dark .question-panel:hover {
+  background-color: #383838;
+  border-color: #666;
+}
+
 .ki-svg path, .student-svg path {
   fill: #333333; 
   stroke: #333333; 
