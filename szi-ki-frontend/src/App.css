@@ -58,7 +58,7 @@ html, body {
   fill: #000000; /* Default color */
 }
 
-.container.dark .dark-mode-svg .dark-mode-path {
+.container.dark .dark-mode-svg .dark-mode-path, .login-container.dark .dark-mode-svg .dark-mode-path {
   fill: #ffffff; 
 }
 
@@ -549,4 +549,147 @@ svg {
   50% {
     opacity: 1;
   }
+}
+
+/* Login Main */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #fff;
+  transition: background-color 0.1s, color 0.1s;
+}
+
+.login-container.dark {
+  background-color: #202020;
+}
+
+.login-container.dark .login-container {
+  background-color: #202020;
+  color: #fff;
+}
+
+.login-top-bar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.login-logo img {
+  margin-right: 10px;
+}
+
+.login-form {
+  background-color: #f4f4f4;
+  padding: 40px;
+  border-radius: 10px;
+  text-align: left;
+  transition: background-color 0.1s, color 0.1s;
+}
+
+.login-container.dark .login-form {
+  background-color: #303030;
+  color: #fff;
+}
+
+.login-form h1 {
+  margin-bottom: 20px;
+  font-size: 2em;
+  color: #333;
+}
+
+.login-container.dark .login-form h1 {
+  color: #fff;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 1em;
+  color: #333;
+}
+
+.login-container.dark .form-group label {
+  color: #fff;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  transition: background-color 0.1s, color 0.1s;
+}
+
+.login-container.dark .form-group input {
+  background-color: #505050;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+.login-button,
+.register-button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.1s, color 0.1s;
+}
+
+.login-button {
+  background-color: #333;
+  color: #fff;
+}
+
+.login-button:hover {
+  background-color: #555;
+}
+
+.register-button {
+  background-color: #ddd;
+  color: #333;
+}
+
+.register-button:hover {
+  background-color: #ccc;
+}
+
+.login-container.dark .register-button {
+  background-color: #505050;
+  color: #fff;
+}
+
+.login-container.dark .register-button:hover {
+  background-color: #666;
+}
+
+.forgot-password {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #666;
+  text-decoration: none;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.login-container.dark .forgot-password {
+  color: #aaa;
 }
