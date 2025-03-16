@@ -109,6 +109,12 @@ html, body {
   margin: 0px;
 }
 
+.chat-message-wrapper .user-message,
+.chat-message-wrapper .bot-message,
+.question-panel {
+  word-break: break-word;
+}
+
 .container.dark .bot-message {
   background-color: #303030;
   color: #fff;
@@ -163,6 +169,26 @@ html, body {
 .container.dark .question-panel:hover {
   background-color: #383838;
   border-color: #666;
+}
+
+.intro-text-wrapper {
+  text-align: left;
+}
+
+.intro-text {
+  font-size: 1em;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.faq-style {
+  color:#666;
+  font-weight: 700;
+}
+
+.container.dark .faq-style {
+  color:#969696;
+  font-weight: 700;
 }
 
 .ki-svg path, .student-svg path {

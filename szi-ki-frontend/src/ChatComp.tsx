@@ -174,7 +174,11 @@ class ChatComp extends Component<ChatProps, ChatState> {
               ))
             ) : (
               <div className="no-messages">
-                <h1>Wie kann ich dir helfen?</h1>
+                <h1>Wilkommen!</h1>
+                <div className="intro-text-wrapper">
+                  <div className="intro-text">Ich bin der SZI-Assistent! <br/> Du kannst mir Fragen rund um das Studienzentrum Informatik stellen!</div>
+                  <div className="intro-text faq-style"> <br/>Häufig gestellte Fragen:</div>
+                </div>
                 <div className="example-questions">
                   <div className="question-panel" onClick={() => this.handleInputButtonClick("Wie viele Seiten braucht meine 2. Projektarbeit?")}>Wie viele Seiten braucht meine 2. Projektarbeit?</div>
                   <div className="question-panel" onClick={() => this.handleInputButtonClick("Welche Kapitel muss meine Projektarbeit enthalten?")}>Welche Kapitel muss meine Projektarbeit enthalten?</div>
@@ -203,7 +207,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
             <textarea
               ref={this.textareaRef}
               className="chat-text-input"
-              placeholder="Frag mich etwas!"
+              placeholder="Stell mir eine Frage..."
               value={inputText}
               onChange={this.handleInputChange}
               onKeyDown={this.handleKeyDown}
