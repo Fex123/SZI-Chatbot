@@ -71,6 +71,53 @@ html, body {
   overflow-y: auto;
 }
 
+.error-message {
+  background-color: #ffdddd;
+  text-align: left;
+  color: #d8000c;
+  border: 1px solid #d8000c;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+  
+}
+
+.error-message p {
+  text-align: center;
+}
+
+.container.dark .error-message {
+  background-color: #4f0000;
+  color: #ffdddd;
+  border-color: #ffdddd;
+}
+
+.try-again-button {
+  background-color: #d8000c;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.1s;
+}
+
+.try-again-button:hover {
+  background-color: #a80000;
+}
+
+.container.dark .try-again-button {
+  background-color: #ffdddd;
+  color: #d8000c;
+}
+
+.container.dark .try-again-button:hover {
+  background-color: #ffaaaa;
+}
+
+
+
 .chat-content {
   width: 800px;
   display: flex;
@@ -111,7 +158,8 @@ html, body {
 
 .chat-message-wrapper .user-message,
 .chat-message-wrapper .bot-message,
-.question-panel {
+.question-panel,
+.error-message {
   word-break: break-word;
 }
 
@@ -204,6 +252,18 @@ html, body {
 .send-svg path, .plus-svg path {
   fill: #000000; 
   stroke: #00000000; 
+}
+
+.send-button.disabled .send-svg path{
+  fill: #777777;
+}
+
+.container.dark .send-button.disabled .send-svg path {
+  background-color: #555;
+}
+
+.send-button.disabled .icon-hover-wrapper {
+  background-color: #00000000;
 }
 
 .profile-svg {

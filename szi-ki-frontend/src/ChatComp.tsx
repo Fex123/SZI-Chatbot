@@ -29,24 +29,26 @@ const studentSvg = (
   </svg>
 );
 
-const profileSvg = (
-<svg className="profile-svg" height="30px" width="30px" fill="none" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 45.532 45.532" xmlSpace="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M22.766,0.001C10.194,0.001,0,10.193,0,22.766s10.193,22.765,22.766,22.765c12.574,0,22.766-10.192,22.766-22.765 S35.34,0.001,22.766,0.001z M22.766,6.808c4.16,0,7.531,3.372,7.531,7.53c0,4.159-3.371,7.53-7.531,7.53 c-4.158,0-7.529-3.371-7.529-7.53C15.237,10.18,18.608,6.808,22.766,6.808z M22.761,39.579c-4.149,0-7.949-1.511-10.88-4.012 c-0.714-0.609-1.126-1.502-1.126-2.439c0-4.217,3.413-7.592,7.631-7.592h8.762c4.219,0,7.619,3.375,7.619,7.592 c0,0.938-0.41,1.829-1.125,2.438C30.712,38.068,26.911,39.579,22.761,39.579z"></path> </g> </g></svg>
-);
-
 interface ChatState {
   inputText: string;
   isLoading: boolean;
+  isError: boolean;
+  errorMessage: string | null;
+  lastMessage: string;
 }
 
 class ChatComp extends Component<ChatProps, ChatState> {
   textareaRef = React.createRef<HTMLTextAreaElement>();
-  chatContentRef = React.createRef<HTMLDivElement>(); // Add this line
+  chatContentRef = React.createRef<HTMLDivElement>();
 
   constructor(props: ChatProps) {
     super(props);
     this.state = {
       inputText: '',
       isLoading: false,
+      isError: false,
+      errorMessage: null,
+      lastMessage: "",
     };
   }
 
@@ -68,7 +70,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
   };
 
   handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key === 'Enter' && !event.shiftKey && !this.state.isLoading && !this.state.isError) {
       event.preventDefault();
       this.handleInputButtonClick();
     }
@@ -86,8 +88,9 @@ class ChatComp extends Component<ChatProps, ChatState> {
     }
   };
 
-  handleInputButtonClick = async (inputText?: string) => {
+  handleInputButtonClick = async (inputText?: string, isRetry?: boolean) => {
     const { chat } = this.props;
+    const isRetryFlag = isRetry ?? false;
     const textToSend = inputText || this.state.inputText;
     const trimmedInput = textToSend.trim();
     if (trimmedInput === '') {
@@ -95,16 +98,20 @@ class ChatComp extends Component<ChatProps, ChatState> {
     }
 
     this.setState({
-      inputText: ''
+      inputText: '',
+      errorMessage: null,
+      isError: false,
     }, () => {
       this.adjustTextareaHeight();
     });
 
     if (chat) {
-      chat.messages.push(trimmedInput);
+      if (!isRetryFlag) {
+        chat.messages.push(trimmedInput);
+      }
       this.scrollToBottom();
 
-      this.setState({ isLoading: true });
+      this.setState({ isLoading: true, lastMessage: trimmedInput });
 
       try {
         const response = await sendMessage(chat.conversation_id, trimmedInput);
@@ -121,7 +128,9 @@ class ChatComp extends Component<ChatProps, ChatState> {
         this.scrollToBottom();
 
       } catch (error) {
+        
         console.error('Error sending message:', error);
+        this.setState({ errorMessage: `Error sending message. \n \n ${error}`, isError: true});
       } finally {
         this.setState({ isLoading: false });
       }
@@ -137,7 +146,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
 
   render() {
     const { chat } = this.props;
-    const { inputText, isLoading } = this.state;
+    const { inputText, isLoading, isError, errorMessage, lastMessage } = this.state;
 
     return (
       <div className="content">
@@ -186,6 +195,15 @@ class ChatComp extends Component<ChatProps, ChatState> {
                 </div>
               </div>
             )}
+            {errorMessage && (
+              <div className="error-message">
+                <div>
+                {errorMessage}
+                </div>
+                
+                <button className="try-again-button" onClick={() => this.handleInputButtonClick(lastMessage, true)}>Erneut versuchen</button>
+              </div>
+            )}
             {isLoading && (
               <div className="chat-message-wrapper">
                 <div className="chat-profile-pic">
@@ -212,7 +230,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
               onChange={this.handleInputChange}
               onKeyDown={this.handleKeyDown}
             />
-            <button className="send-button" onClick={() => this.handleInputButtonClick()} disabled={isLoading}>
+            <button className={`send-button ${isLoading || isError ? 'disabled' : ''}`} onClick={() => this.handleInputButtonClick()} disabled={isLoading || isError}>
               <div className="icon-hover-wrapper">
                 {sendSvg}
               </div>
