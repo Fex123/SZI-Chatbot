@@ -1,41 +1,28 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import DarkModeToggle from './Dmtoggle';
 import logo from './assets/logo.svg';
 import { loginUser, registerUser } from './helper';
+import { useNavigate } from 'react-router-dom';
 
+const Login: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const navigate = useNavigate();
 
-
-interface LoginState {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  darkMode: boolean;
-  isLogin: boolean;
-  feedbackMessage: string;
-}
-
-class Login extends Component<{}, LoginState> {
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      email: '',
-      password: '',
-      confirmPassword: '',
-      darkMode: false,
-      isLogin: true,
-      feedbackMessage: '',
-    };
-  }
-
-  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    this.setState({ [name]: value } as unknown as Pick<LoginState, keyof LoginState>);
+    if (name === 'email') setEmail(value);
+    if (name === 'password') setPassword(value);
+    if (name === 'confirmPassword') setConfirmPassword(value);
   };
 
-  handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const { email, password, confirmPassword, isLogin } = this.state;
 
     if (isLogin) {
       try {
@@ -44,7 +31,7 @@ class Login extends Component<{}, LoginState> {
         // Save login response to session storage
         sessionStorage.setItem('loginResponse', JSON.stringify(response));
         // Handle successful login
-        window.location.href = 'app.html'; // Redirect to app.html
+        navigate('/app'); // Redirect to the main app
       } catch (error) {
         console.error('Login failed:', error);
         // Handle login error
@@ -59,10 +46,9 @@ class Login extends Component<{}, LoginState> {
         const response = await registerUser(email, password, email); // Assuming display name is the same as email
         console.log('Registration successful:', response);
         // Handle successful registration
-        this.setState({
-          isLogin: true,
-          feedbackMessage: 'Erfolgreich registriert!',
-        });
+        setIsLogin(true);
+        setFeedbackMessage('Erfolgreich registriert!');
+        navigate('/app'); // Redirect to the main app after registration
       } catch (error) {
         console.error('Registration failed:', error);
         // Handle registration error
@@ -70,90 +56,87 @@ class Login extends Component<{}, LoginState> {
     }
   };
 
-  toggleDarkMode = () => {
-    this.setState((prevState) => ({ darkMode: !prevState.darkMode }));
+  const toggleDarkMode = () => {
+    setDarkMode((prevDarkMode) => !prevDarkMode);
   };
 
-  toggleLoginState = () => {
-    this.setState((prevState) => ({ isLogin: !prevState.isLogin, feedbackMessage: '' }));
+  const toggleLoginState = () => {
+    setIsLogin((prevIsLogin) => !prevIsLogin);
+    setFeedbackMessage('');
   };
 
-  render() {
-    const { email, password, confirmPassword, darkMode, isLogin, feedbackMessage } = this.state;
-
-    return (
-      <div className={`login-container ${darkMode ? 'dark' : ''}`}>
-        <div className="login-top-bar">
-          <DarkModeToggle isDark={darkMode} toggleDarkMode={this.toggleDarkMode} />
+  return (
+    <div className={`login-container ${darkMode ? 'dark' : ''}`}>
+      <div className="login-top-bar">
+        <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
+      </div>
+      <div className="login-logo">
+        <img src={logo} alt="Logo" className="dhbw-logo" title="Create new chat" />
+        <h1>SZI Assistent</h1>
+      </div>
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h1>{isLogin ? 'Anmelden' : 'Registrieren'}</h1>
+        {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>}
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={email}
+            onChange={handleInputChange}
+            required
+          />
         </div>
-        <div className="login-logo">
-          <img src={logo} alt="Logo" className="dhbw-logo" title="Create new chat" />
-          <h1>SZI Assistent</h1>
+        <div className="form-group">
+          <label htmlFor="password">Passwort</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value={password}
+            onChange={handleInputChange}
+            required
+          />
         </div>
-        <form className="login-form" onSubmit={this.handleSubmit}>
-          <h1>{isLogin ? ("Anmelden") : ("Registrieren")}</h1>
-          {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>}
+        {!isLogin && (
           <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={email}
-              onChange={this.handleInputChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="password">Passwort</label>
+            <label htmlFor="confirmPassword">Passwort bestätigen</label>
             <input
               type="password"
-              id="password"
-              name="password"
-              value={password}
-              onChange={this.handleInputChange}
+              id="confirmPassword"
+              name="confirmPassword"
+              value={confirmPassword}
+              onChange={handleInputChange}
               required
             />
           </div>
-          {!isLogin && (
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Passwort bestätigen</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={confirmPassword}
-                onChange={this.handleInputChange}
-                required
-              />
-            </div>
-          )}
-          <div className="form-group">
-            <a href="#" className="forgot-password">Passwort vergessen?</a>
-          </div>
+        )}
+        <div className="form-group">
+          <a href="#" className="forgot-password">Passwort vergessen?</a>
+        </div>
 
-          {isLogin ? (
-            <div className="form-group">
-              <button type="submit" className="login-register-button">Anmelden</button>
-            </div>
-          ) : (
-            <div className="form-group">
-              <button type="submit" className="login-register-button">Registrieren</button>
-            </div>
-          )}
-          {isLogin ? (
-            <div className="form-group">
-              <a onClick={this.toggleLoginState} className="forgot-password">Noch keinen Account? Registrieren</a>
-            </div>
-          ) : (
-            <div className="form-group">
-              <a onClick={this.toggleLoginState} className="forgot-password">Bereits registriert? Anmelden</a>
-            </div>
-          )}
-        </form>
-      </div>
-    );
-  }
-}
+        {isLogin ? (
+          <div className="form-group">
+            <button type="submit" className="login-register-button">Anmelden</button>
+          </div>
+        ) : (
+          <div className="form-group">
+            <button type="submit" className="login-register-button">Registrieren</button>
+          </div>
+        )}
+        {isLogin ? (
+          <div className="form-group">
+            <a onClick={toggleLoginState} className="forgot-password">Noch keinen Account? Registrieren</a>
+          </div>
+        ) : (
+          <div className="form-group">
+            <a onClick={toggleLoginState} className="forgot-password">Bereits registriert? Anmelden</a>
+          </div>
+        )}
+      </form>
+    </div>
+  );
+};
 
 export default Login;
