@@ -265,7 +265,7 @@ body {
 }
 
 .container.dark .send-button.disabled .send-svg path {
-  background-color: #555;
+  fill: #555;
 }
 
 .send-button.disabled .icon-hover-wrapper {

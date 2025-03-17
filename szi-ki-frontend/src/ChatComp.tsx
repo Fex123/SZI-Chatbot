@@ -23,8 +23,8 @@ const sendSvg = (
 const studentSvg = (
   <svg className="student-svg" height="28px" width="28px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xmlSpace="preserve">
     <g>
-      <path className="st0" d="M505.837,180.418L279.265,76.124c-7.349-3.385-15.177-5.093-23.265-5.093c-8.088,0-15.914,1.708-23.265,5.093L6.163,180.418C2.418,182.149,0,185.922,0,190.045s2.418,7.896,6.163,9.627l226.572,104.294c7.349,3.385,15.177,5.101,23.265,5.101c8.088,0,15.916-1.716,23.267-5.101l178.812-82.306v82.881c-7.096,0.8-12.63,6.84-12.63,14.138c0,6.359,4.208,11.864,10.206,13.618l-12.092,79.791h55.676l-12.09-79.791c5.996-1.754,10.204-7.259,10.204-13.618c0-7.298-5.534-13.338-12.63-14.138v-95.148l21.116-9.721c3.744-1.731,6.163-5.504,6.163-9.627S509.582,182.149,505.837,180.418z"/>
-      <path className="st0" d="M256,346.831c-11.246,0-22.143-2.391-32.386-7.104L112.793,288.71v101.638c0,22.314,67.426,50.621,143.207,50.621c75.782,0,143.209-28.308,143.209-50.621V288.71l-110.827,51.017C278.145,344.44,267.25,346.831,256,346.831z"/>
+      <path className="st0" d="M505.837,180.418L279.265,76.124c-7.349-3.385-15.177-5.093-23.265-5.093c-8.088,0-15.914,1.708-23.265,5.093L6.163,180.418C2.418,182.149,0,185.922,0,190.045s2.418,7.896,6.163,9.627l226.572,104.294c7.349,3.385,15.177,5.101,23.265,5.101c8.088,0,15.916-1.716,23.267-5.101l178.812-82.306v82.881c-7.096,0.8-12.63,6.84-12.63,14.138c0,6.359,4.208,11.864,10.206,13.618l-12.092,79.791h55.676l-12.09-79.791c5.996-1.754,10.204-7.259,10.204-13.618c0-7.298-5.534-13.338-12.63-14.138v-95.148l21.116-9.721c3.744-1.731,6.163-5.504,6.163-9.627S509.582,182.149,505.837,180.418z" />
+      <path className="st0" d="M256,346.831c-11.246,0-22.143-2.391-32.386-7.104L112.793,288.71v101.638c0,22.314,67.426,50.621,143.207,50.621c75.782,0,143.209-28.308,143.209-50.621V288.71l-110.827,51.017C278.145,344.44,267.25,346.831,256,346.831z" />
     </g>
   </svg>
 );
@@ -67,6 +67,20 @@ class ChatComp extends Component<ChatProps, ChatState> {
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
+    /* TODO: When testing with backend, Make sure error handling works when fetching chats
+    
+      fetchAndAddMessages = async (chat: Chat) => {
+  try {
+    let messages = await fetchConversationMessages(chat.conversation_id);
+    chat.messages = messages;
+    chat.registered = true;
+    this.setState({});
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    this.setState({ errorMessage: `Error fetching messages. \n \n ${error}`, isError: true });
+  }
+};
+    */
   };
 
   handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -128,9 +142,9 @@ class ChatComp extends Component<ChatProps, ChatState> {
         this.scrollToBottom();
 
       } catch (error) {
-        
+
         console.error('Error sending message:', error);
-        this.setState({ errorMessage: `Error sending message. \n \n ${error}`, isError: true});
+        this.setState({ errorMessage: `Error sending message. \n \n ${error}`, isError: true });
       } finally {
         this.setState({ isLoading: false });
       }
@@ -185,8 +199,8 @@ class ChatComp extends Component<ChatProps, ChatState> {
               <div className="no-messages">
                 <h1>Wilkommen!</h1>
                 <div className="intro-text-wrapper">
-                  <div className="intro-text">Ich bin der SZI-Assistent! <br/> Du kannst mir Fragen rund um das Studienzentrum Informatik stellen!</div>
-                  <div className="intro-text faq-style"> <br/>Häufig gestellte Fragen:</div>
+                  <div className="intro-text">Ich bin der SZI-Assistent! <br /> Du kannst mir Fragen rund um das Studienzentrum Informatik stellen!</div>
+                  <div className="intro-text faq-style"> <br />Häufig gestellte Fragen:</div>
                 </div>
                 <div className="example-questions">
                   <div className="question-panel" onClick={() => this.handleInputButtonClick("Wie viele Seiten braucht meine 2. Projektarbeit?")}>Wie viele Seiten braucht meine 2. Projektarbeit?</div>
@@ -198,9 +212,9 @@ class ChatComp extends Component<ChatProps, ChatState> {
             {errorMessage && (
               <div className="error-message">
                 <div>
-                {errorMessage}
+                  {errorMessage}
                 </div>
-                
+
                 <button className="try-again-button" onClick={() => this.handleInputButtonClick(lastMessage, true)}>Erneut versuchen</button>
               </div>
             )}
