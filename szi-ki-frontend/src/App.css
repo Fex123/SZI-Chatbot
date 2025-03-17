@@ -4,7 +4,8 @@
   text-align: center;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
 }
@@ -55,11 +56,13 @@ html, body {
 }
 
 .dark-mode-svg .dark-mode-path {
-  fill: #000000; /* Default color */
+  fill: #000000;
+  /* Default color */
 }
 
-.container.dark .dark-mode-svg .dark-mode-path, .login-container.dark .dark-mode-svg .dark-mode-path {
-  fill: #ffffff; 
+.container.dark .dark-mode-svg .dark-mode-path,
+.login-container.dark .dark-mode-svg .dark-mode-path {
+  fill: #ffffff;
 }
 
 .chat-wrapper {
@@ -79,7 +82,7 @@ html, body {
   border-radius: 10px;
   padding: 20px;
   margin: 20px 0;
-  
+
 }
 
 .error-message p {
@@ -230,31 +233,34 @@ html, body {
 }
 
 .faq-style {
-  color:#666;
+  color: #666;
   font-weight: 700;
 }
 
 .container.dark .faq-style {
-  color:#969696;
+  color: #969696;
   font-weight: 700;
 }
 
-.ki-svg path, .student-svg path {
-  fill: #333333; 
-  stroke: #333333; 
+.ki-svg path,
+.student-svg path {
+  fill: #333333;
+  stroke: #333333;
 }
 
-.container.dark .ki-svg path, .container.dark .student-svg path {
-  fill: #bdbdbd; 
-  stroke: #bdbdbd; 
+.container.dark .ki-svg path,
+.container.dark .student-svg path {
+  fill: #bdbdbd;
+  stroke: #bdbdbd;
 }
 
-.send-svg path, .plus-svg path {
-  fill: #000000; 
-  stroke: #00000000; 
+.send-svg path,
+.plus-svg path {
+  fill: #000000;
+  stroke: #00000000;
 }
 
-.send-button.disabled .send-svg path{
+.send-button.disabled .send-svg path {
   fill: #777777;
 }
 
@@ -267,19 +273,23 @@ html, body {
 }
 
 .profile-svg {
-  fill: #000000; 
-  stroke: #00000000; 
+  fill: #000000;
+  stroke: #00000000;
 }
 
-.container.dark .ki-svg path, .container.dark .profile-svg,
- .container.dark .student-svg path, .container.dark .send-svg path,
-  .container.dark .plus-svg path, .container.dark .profile-svg, .container.dark .modal-svg {
-  fill: #fff; 
-  stroke: #00000000; 
+.container.dark .ki-svg path,
+.container.dark .profile-svg,
+.container.dark .student-svg path,
+.container.dark .send-svg path,
+.container.dark .plus-svg path,
+.container.dark .profile-svg,
+.container.dark .modal-svg {
+  fill: #fff;
+  stroke: #00000000;
 }
 
 .chat-profile-pic {
-  padding: 15px 10px 10px 10px; 
+  padding: 15px 10px 10px 10px;
   padding-top: 20px;
 }
 
@@ -295,7 +305,7 @@ html, body {
 
 .dark-mode-button {
   background-color: #00000000;
-  border:#00000000;
+  border: #00000000;
   max-height: 33px;
   display: flex;
   align-items: center;
@@ -314,7 +324,7 @@ svg {
   padding: 4px;
   border-radius: 20%;
   background-color: #00000000;
-  transition: background-color 0.1s, color 0.1s; 
+  transition: background-color 0.1s, color 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -326,11 +336,11 @@ svg {
 
 
 .container .dark-mode-button svg {
-  fill: #000000; 
+  fill: #000000;
 }
 
 .container.dark .dark-mode-button svg {
-  fill: #ffffff; 
+  fill: #ffffff;
 }
 
 .chat-text-input-wrapper {
@@ -346,7 +356,7 @@ svg {
   width: 100%;
   min-height: 60px;
   max-height: 150px;
-  overflow-y: auto; 
+  overflow-y: auto;
   resize: none;
   background-color: #00000000;
   border: #00000000;
@@ -356,12 +366,12 @@ svg {
 
 
 .chat-text-input {
-  color: #000; 
+  color: #000;
 }
 
 
 .container.dark .chat-text-input {
-  color: #fff; 
+  color: #fff;
 }
 
 .chat-text-input:focus {
@@ -388,7 +398,7 @@ svg {
   background-color: #00000000;
   border: #00000000;
   width: fit-content;
-  height:fit-content;
+  height: fit-content;
   padding-left: 20px;
 }
 
@@ -416,7 +426,7 @@ svg {
   text-align: left;
   font-size: 0.95em;
   display: flex;
-  transition: background-color 0.1s, color 0.1s; 
+  transition: background-color 0.1s, color 0.1s;
 }
 
 .profile-pic-circle {
@@ -431,19 +441,19 @@ svg {
   display: flex;
   position: fixed;
   z-index: 1;
-  right: 10px; 
-  top: 50px; 
+  right: 10px;
+  top: 50px;
   width: auto;
   height: auto;
-  background-color: rgba(0,0,0,0); 
+  background-color: rgba(0, 0, 0, 0);
   justify-content: center;
   align-items: center;
-  
+
 }
 
 .modal-user-info {
   font-size: 0.95em;
-  color:#acacac;
+  color: #acacac;
 }
 
 
@@ -485,25 +495,25 @@ svg {
 }
 
 .container.dark .modal-button {
-  
+
   color: #fff;
 }
 
 .modal-svg path {
-  fill: #000000; 
-  stroke: #00000000; 
+  fill: #000000;
+  stroke: #00000000;
 }
 
 .signout-text {
-  
-    margin-left: 5px;
-    
+
+  margin-left: 5px;
+
 }
 
 .chat-top-bar-buttons {
   display: flex;
   align-items: center;
-  gap: 5px; 
+  gap: 5px;
   padding-right: 20px;
 }
 
@@ -548,9 +558,9 @@ svg {
   text-align: left;
   font-size: 0.95em;
   cursor: pointer;
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-sidebar-item:hover {
@@ -582,7 +592,7 @@ svg {
 
 
 .loading-dots {
-  display: flex;  
+  display: flex;
   align-items: center;
   justify-content: flex-start;
 }
@@ -603,9 +613,12 @@ svg {
 }
 
 @keyframes blink {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0;
   }
+
   50% {
     opacity: 1;
   }
@@ -651,8 +664,9 @@ svg {
   background-color: #f4f4f4;
   padding: 40px;
   border-radius: 10px;
-  text-align: left;
+  text-align: center;
   transition: background-color 0.1s, color 0.1s;
+  width: 350px;
 }
 
 .login-container.dark .login-form {
@@ -666,7 +680,7 @@ svg {
   color: #333;
 }
 
-.login-container.dark .login-form h1 {
+.login-container.dark h1 {
   color: #fff;
 }
 
@@ -686,7 +700,7 @@ svg {
 }
 
 .form-group input {
-  width: 100%;
+  width: 250px;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -700,42 +714,20 @@ svg {
   border: 1px solid #555;
 }
 
-.login-button,
-.register-button {
-  width: 100%;
+.login-register-button {
+  width: 250px;
   padding: 10px;
   border: none;
   border-radius: 5px;
   font-size: 1em;
   cursor: pointer;
   transition: background-color 0.1s, color 0.1s;
-}
-
-.login-button {
-  background-color: #333;
+  background-color: #ff0000;
   color: #fff;
 }
 
-.login-button:hover {
-  background-color: #555;
-}
-
-.register-button {
-  background-color: #ddd;
-  color: #333;
-}
-
-.register-button:hover {
-  background-color: #ccc;
-}
-
-.login-container.dark .register-button {
-  background-color: #505050;
-  color: #fff;
-}
-
-.login-container.dark .register-button:hover {
-  background-color: #666;
+.login-register-button:hover {
+  background-color: #ff4d4d;
 }
 
 .forgot-password {
@@ -744,6 +736,7 @@ svg {
   font-size: 0.9em;
   color: #666;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .forgot-password:hover {

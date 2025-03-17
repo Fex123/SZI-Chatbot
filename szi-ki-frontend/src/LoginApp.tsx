@@ -6,7 +6,9 @@ import logo from './assets/logo.svg';
 interface LoginState {
   email: string;
   password: string;
+  confirmPassword: string;
   darkMode: boolean;
+  isLogin: boolean;
 }
 
 class Login extends Component<{}, LoginState> {
@@ -15,7 +17,9 @@ class Login extends Component<{}, LoginState> {
     this.state = {
       email: '',
       password: '',
+      confirmPassword: '',
       darkMode: false,
+      isLogin: true,
     };
   }
 
@@ -26,15 +30,27 @@ class Login extends Component<{}, LoginState> {
 
   handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Handle login logic here
+    if (this.state.isLogin === true) {
+      console.log('Login:', this.state.email, this.state.password);
+    } else {
+      if (this.state.password !== this.state.confirmPassword) {
+        console.log('Passwords do not match');
+        return;
+      }
+      console.log('Register:', this.state.email, this.state.password);
+    }
   };
 
   toggleDarkMode = () => {
     this.setState((prevState) => ({ darkMode: !prevState.darkMode }));
   };
 
+  toggleLoginState = () => {
+    this.setState((prevState) => ({ isLogin: !prevState.isLogin }));
+  };
+
   render() {
-    const { email, password, darkMode } = this.state;
+    const { email, password, confirmPassword, darkMode, isLogin } = this.state;
 
     return (
       <div className={`login-container ${darkMode ? 'dark' : ''}`}>
@@ -42,11 +58,11 @@ class Login extends Component<{}, LoginState> {
           <DarkModeToggle isDark={darkMode} toggleDarkMode={this.toggleDarkMode} />
         </div>
         <div className="login-logo">
-        <img src={logo} alt="Logo" className="dhbw-logo" title="Create new chat"/>
+          <img src={logo} alt="Logo" className="dhbw-logo" title="Create new chat" />
           <h1>SZI Assistent</h1>
         </div>
         <form className="login-form" onSubmit={this.handleSubmit}>
-          <h1>Login</h1>
+          <h1>{isLogin ? ("Anmelden") : ("Registrieren")}</h1>
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -59,7 +75,7 @@ class Login extends Component<{}, LoginState> {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Passwort</label>
             <input
               type="password"
               id="password"
@@ -69,15 +85,41 @@ class Login extends Component<{}, LoginState> {
               required
             />
           </div>
+          {!isLogin && (
+            <div className="form-group">
+              <label htmlFor="confirmPassword">Passwort bestätigen</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={this.handleInputChange}
+                required
+              />
+            </div>
+          )}
           <div className="form-group">
-            <a href="#" className="forgot-password">Password vergessen?</a>
+            <a href="#" className="forgot-password">Passwort vergessen?</a>
           </div>
-          <div className="form-group">
-            <button type="submit" className="login-button">Login</button>
-          </div>
-          <div className="form-group">
-            <button type="button" className="register-button">Register</button>
-          </div>
+
+          {isLogin ? (
+            <div className="form-group">
+              <button type="submit" className="login-register-button">Anmelden</button>
+            </div>
+          ) : (
+            <div className="form-group">
+              <button type="submit" className="login-register-button">Registrieren</button>
+            </div>
+          )}
+          {isLogin ? (
+            <div className="form-group">
+              <a onClick={this.toggleLoginState} className="forgot-password">Noch keinen Account? Registrieren</a>
+            </div>
+          ) : (
+            <div className="form-group">
+              <a onClick={this.toggleLoginState} className="forgot-password">Bereits registriert? Anmelden</a>
+            </div>
+          )}
         </form>
       </div>
     );
