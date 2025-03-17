@@ -122,6 +122,17 @@ Request body:
     "username": "john_doe",
     "password": "secure_password"
 }
+
+Response:
+{
+    "token": "your_token_here",
+    "expires": "2024-02-21T15:30:00.000Z",
+    "user": {
+        "user_id": "uuid_here",
+        "username": "john_doe",
+        "display_name": "John Doe"
+    }
+}
 """
 @app.route('/api/auth/login', methods=['POST'])
 def login():
@@ -159,12 +170,13 @@ def logout():
 """
 Send a message to the chatbot
 POST /api/chat/send
+Authorization: Bearer <token>
+Content-Type: application/json
 
 Request body:
 {
     "query": "Hello, how are you?",
     "conversation_id": "507f1f77bcf86cd799439011",  # optional
-    "user_id": "dev_user"                           # optional
 }
 
 Response:
@@ -228,10 +240,8 @@ def send_message():
 
 """
 Get all conversations for a user
-GET /api/conversations?user_id=dev_user
-
-Query parameters:
-- user_id: string (optional, defaults to "dev_user")
+GET /api/conversations
+Authorization: Bearer <token>
 
 Response:
 {
@@ -268,13 +278,11 @@ def get_user_conversations():
 
 """
 Get all messages from a conversation
-GET /api/conversations/<conversation_id>/messages?user_id=dev_user
+GET /api/conversations/<conversation_id>/messages
+Authorization: Bearer <token>
 
 Path parameters:
 - conversation_id: string (required)
-
-Query parameters:
-- user_id: string (optional, defaults to "dev_user")
 
 Response:
 {
@@ -323,6 +331,7 @@ def get_conversation_messages(conversation_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+""" PROBABLY NOT NEEDED """
 # Use similar pattern for other endpoints that need user context
 @app.route('/api/auth/profile', methods=['GET'])
 @auth.login_required
