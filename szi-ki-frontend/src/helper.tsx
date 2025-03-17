@@ -1,4 +1,4 @@
-const API_URL = 'http://host.docker.internal:3104'; //"http://127.0.0.1:3104"; 
+const API_URL = 'http://localhost:3104'; //"http://localhost:3104"; 
 const API_user = "dev_user"; //TODO: 
 
 // Fetches Conversation IDs and Titles, ** without message history **

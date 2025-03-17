@@ -3,9 +3,14 @@ services:
   szi-ki-frontend:
     build:
       context: ./szi-ki-frontend
+    #needed for server!!
+    #delete volumes for local
+    volumes:
+      - ./webserver:/usr/local/apache2/htdocs/
+      - ./webserver/httpd.conf:/usr/local/apache2/conf/httpd.conf
     ports:
       - "3105:80"
-  mongodb:
+  mongo:
     image: mongo:latest
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -20,17 +25,20 @@ services:
     build: 
       context: ./testapi
     depends_on:
-      - mongodb
+      - mongo
     ports:
       - "3104:3104"
     networks:
       - app_network
+      - szi-ki-network
     env_file:
       - .env
 
 networks:
   app_network:
     driver: bridge
+  szi-ki-network:
+    external: true
 
 volumes:
   mongodb_data:
