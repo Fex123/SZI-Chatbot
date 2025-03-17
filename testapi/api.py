@@ -10,9 +10,7 @@ from controllers.auth_controller import AuthController
 from controllers.message_controller import MessageController
 from models.request_models import SendMessageRequest, UserCreateRequest, LoginRequest
 from models.response_models import ConversationResponse, MessageResponse, UserResponse
-from services.validation_service import ValidationService
 from services.user_service import UserService
-from services.message_service import MessageService
 
 app = Flask(__name__)
 CORS(app)
