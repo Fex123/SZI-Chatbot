@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import './App.css';
-import { logoutUser } from './helper';
-import { useNavigate } from 'react-router-dom';
 
 const profileSvg = (
   <svg className="profile-svg" height="30px" width="30px" fill="none" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 45.532 45.532" xmlSpace="preserve">
@@ -25,34 +23,17 @@ const deleteSvg = (
 
 interface ProfilePicState {
   isModalOpen: boolean;
-  username: string;
 }
 
 class ProfilePic extends Component<{}, ProfilePicState> {
   modalRef: React.RefObject<HTMLDivElement>;
-  navigate: ReturnType<typeof useNavigate>;
 
   constructor(props: {}) {
     super(props);
     this.state = {
       isModalOpen: false,
-      username: ''
     };
     this.modalRef = React.createRef();
-    this.navigate = useNavigate();
-  }
-
-  componentDidMount() {
-    document.addEventListener('mousedown', this.handleClickOutside);
-    const loginResponse = sessionStorage.getItem('loginResponse');
-    if (loginResponse) {
-      const { username } = JSON.parse(loginResponse);
-      this.setState({ username });
-    }
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('mousedown', this.handleClickOutside);
   }
 
   toggleModal = () => {
@@ -67,15 +48,13 @@ class ProfilePic extends Component<{}, ProfilePicState> {
     }
   };
 
-  handleLogout = async () => {
-    try {
-      await logoutUser();
-      sessionStorage.removeItem('loginResponse');
-      this.navigate('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
+  componentDidMount() {
+    document.addEventListener('mousedown', this.handleClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this.handleClickOutside);
+  }
 
   render() {
     return (
@@ -87,14 +66,20 @@ class ProfilePic extends Component<{}, ProfilePicState> {
           <div className="user-modal" ref={this.modalRef}>
             <div className="modal-content">
               <div className="modal-user-info">
-                {this.state.username}
+              mustermannm@dhbw-loerrach.de
               </div>
               <div style={{ border: '1px solid #acacac', margin: '10px 0' }}></div>
-              <div className="modal-button" onClick={this.handleLogout}>
+              <div className="modal-button">
                 {signoutSvg}
                 <div className="signout-text">
-                  Abmelden
-                </div>
+                Abmelden
+                </div>               
+              </div>
+              <div className="modal-button">
+                {deleteSvg}
+                <div className="signout-text">
+                Account Löschen
+                </div>               
               </div>
             </div>
           </div>
