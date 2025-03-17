@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import './App.css';
 import DarkModeToggle from './Dmtoggle';
 import logo from './assets/logo.svg';
+import { loginUser, registerUser } from './helper';
+
+
 
 interface LoginState {
   email: string;
@@ -9,6 +12,7 @@ interface LoginState {
   confirmPassword: string;
   darkMode: boolean;
   isLogin: boolean;
+  feedbackMessage: string;
 }
 
 class Login extends Component<{}, LoginState> {
@@ -20,6 +24,7 @@ class Login extends Component<{}, LoginState> {
       confirmPassword: '',
       darkMode: false,
       isLogin: true,
+      feedbackMessage: '',
     };
   }
 
@@ -28,16 +33,40 @@ class Login extends Component<{}, LoginState> {
     this.setState({ [name]: value } as unknown as Pick<LoginState, keyof LoginState>);
   };
 
-  handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (this.state.isLogin === true) {
-      console.log('Login:', this.state.email, this.state.password);
+    const { email, password, confirmPassword, isLogin } = this.state;
+
+    if (isLogin) {
+      try {
+        const response = await loginUser(email, password);
+        console.log('Login successful:', response);
+        // Save login response to session storage
+        sessionStorage.setItem('loginResponse', JSON.stringify(response));
+        // Handle successful login
+        window.location.href = 'app.html'; // Redirect to app.html
+      } catch (error) {
+        console.error('Login failed:', error);
+        // Handle login error
+      }
     } else {
-      if (this.state.password !== this.state.confirmPassword) {
+      if (password !== confirmPassword) {
         console.log('Passwords do not match');
+        // Handle error
         return;
       }
-      console.log('Register:', this.state.email, this.state.password);
+      try {
+        const response = await registerUser(email, password, email); // Assuming display name is the same as email
+        console.log('Registration successful:', response);
+        // Handle successful registration
+        this.setState({
+          isLogin: true,
+          feedbackMessage: 'Erfolgreich registriert!',
+        });
+      } catch (error) {
+        console.error('Registration failed:', error);
+        // Handle registration error
+      }
     }
   };
 
@@ -46,11 +75,11 @@ class Login extends Component<{}, LoginState> {
   };
 
   toggleLoginState = () => {
-    this.setState((prevState) => ({ isLogin: !prevState.isLogin }));
+    this.setState((prevState) => ({ isLogin: !prevState.isLogin, feedbackMessage: '' }));
   };
 
   render() {
-    const { email, password, confirmPassword, darkMode, isLogin } = this.state;
+    const { email, password, confirmPassword, darkMode, isLogin, feedbackMessage } = this.state;
 
     return (
       <div className={`login-container ${darkMode ? 'dark' : ''}`}>
@@ -63,6 +92,7 @@ class Login extends Component<{}, LoginState> {
         </div>
         <form className="login-form" onSubmit={this.handleSubmit}>
           <h1>{isLogin ? ("Anmelden") : ("Registrieren")}</h1>
+          {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>}
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input

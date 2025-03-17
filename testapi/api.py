@@ -13,6 +13,7 @@ from models.response_models import ConversationResponse, MessageResponse, UserRe
 from services.user_service import UserService
 
 app = Flask(__name__)
+# TODO: man kann sowas implementieren: CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 CORS(app)
 
 # Initialize Bcrypt singleton with app FIRST
