@@ -108,26 +108,6 @@ export const registerUser = async (username: string, password: string, displayNa
   return data;
 };
 
-export const logoutUser = async () => {
-  const token = sessionStorage.getItem('loginResponse') ? JSON.parse(sessionStorage.getItem('loginResponse')!).token : null;
-  const response = await fetch(`${API_URL}/api/auth/logout`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    }
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Logout failed');
-  }
-
-  const data = await response.json();
-  return data;
-};
-
-
 export class Chat {
   private _messages: string[];
   title: string;
