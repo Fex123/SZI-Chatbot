@@ -42,6 +42,15 @@ def init_mongodb_collections():
         ], unique=True)
         print("Messages collection created successfully with indexes")
 
+    # Create tokens collection if it doesn't exist
+    if 'tokens' not in db.list_collection_names():
+        tokens_collection = db.create_collection('tokens')
+        # Create indexes for token management
+        tokens_collection.create_index([('token', ASCENDING)], unique=True)
+        tokens_collection.create_index([('user_id', ASCENDING)])
+        tokens_collection.create_index([('expiry', ASCENDING)])
+        print("Tokens collection created successfully with indexes")
+
     client.close()
     print("All collections initialized successfully!")
 

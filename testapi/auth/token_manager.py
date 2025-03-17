@@ -1,30 +1,46 @@
 import secrets
 from datetime import datetime, timedelta
+from db_connections import DatabaseConnections
 
 class TokenManager:
     def __init__(self):
-        self.tokens = {}  # Store tokens in memory: {token: (user_id, expiry)}
+        db = DatabaseConnections().get_mongodb()
+        self.tokens_collection = db.tokens
 
-    def generate_token(self, user_id, expires_in=3600):
-        """Generate a new token for a user"""
+    def generate_token(self, user_id, expires_in=86400):
+        """Generate a new token for a user and store in MongoDB"""
         token = secrets.token_urlsafe(32)
         expiry = datetime.now() + timedelta(seconds=expires_in)
-        self.tokens[token] = (user_id, expiry)
+        
+        # Store token in MongoDB
+        self.tokens_collection.insert_one({
+            'token': token,
+            'user_id': user_id,
+            'expiry': expiry,
+            'created_at': datetime.now()
+        })
+        
         return token, expiry
 
     def validate_token(self, token):
-        """Validate a token and return user_id if valid"""
-        if token not in self.tokens:
+        """Validate token from MongoDB and return user_id if valid"""
+        token_doc = self.tokens_collection.find_one({'token': token})
+        if not token_doc:
             return None
-        user_id, expiry = self.tokens[token]
-        if datetime.now() > expiry:
-            self.tokens.pop(token)
+            
+        if datetime.now() > token_doc['expiry']:
+            self.tokens_collection.delete_one({'token': token})
             return None
-        return user_id
+            
+        return token_doc['user_id']
 
     def revoke_token(self, token):
-        """Revoke a token"""
-        if token in self.tokens:
-            self.tokens.pop(token)
-            return True
-        return False
+        """Revoke token by removing from MongoDB"""
+        result = self.tokens_collection.delete_one({'token': token})
+        return result.deleted_count > 0
+
+    def cleanup_expired_tokens(self):
+        """Remove all expired tokens"""
+        self.tokens_collection.delete_many({
+            'expiry': {'$lt': datetime.now()}
+        })

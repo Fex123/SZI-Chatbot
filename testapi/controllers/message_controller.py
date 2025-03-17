@@ -13,11 +13,14 @@ class MessageController:
         self.user_service = UserService()
 
     def send_message_to_dify(self, query, conversation_id, user_id):
+        if not user_id:
+            raise ValueError("Authenticated user is required")
+            
         try:
             # Ensure user exists first
             user = self.user_service.get_user(user_id)
             if not user:
-                self.user_service.create_user(user_id)
+                raise ValueError("User not found")
 
             # Check if this is part of an existing conversation
             existing_conv = None
@@ -72,6 +75,9 @@ class MessageController:
             raise Exception(f"Failed to communicate with Dify API: {str(e)}")
 
     def create_new_chat(self, user_id, title=None):
+        if not user_id:
+            raise ValueError("Authenticated user is required")
+            
         # Create conversation first
         conversation = self.message_service.create_conversation(user_id, title)
         

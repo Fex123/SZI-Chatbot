@@ -40,7 +40,7 @@ auth_controller = AuthController()
 class SendMessageRequest(BaseModel):
     query: str
     conversation_id: Optional[str] = None
-    user_id: str = "dev_user"
+    # Remove default user_id as it will come from authentication
 
 class UserCreateRequest(BaseModel):
     username: str

@@ -14,6 +14,10 @@ class MessageService:
         self.messages_collection = db.messages
 
     def save_message(self, conversation_id, user_message, ai_response, user_id):
+        # Validate user_id is provided
+        if not user_id:
+            raise ValueError("user_id is required")
+        
         now = datetime.now()
         message_pair = [
             {'role': 'user', 'content': user_message, 'timestamp': now},
@@ -138,6 +142,9 @@ class MessageService:
         Process and validate a new message
         Returns validated conversation_id or None if invalid
         """
+        if not user_id:
+            raise ValueError("user_id is required")
+            
         if not conversation_id or conversation_id.strip() == "":
             return None
             
@@ -155,6 +162,9 @@ class MessageService:
         Get and format all conversations for a user
         Returns list of formatted conversation dictionaries
         """
+        if not user_id:
+            raise ValueError("user_id is required")
+            
         conversations = self.get_conversations(user_id)
         formatted_conversations = []
         
