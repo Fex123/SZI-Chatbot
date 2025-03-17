@@ -36,10 +36,11 @@ def init_mongodb_collections():
         # Create indexes for efficient querying
         messages_collection.create_index([('conversation_id', ASCENDING)], unique=True)
         messages_collection.create_index([('timestamp', ASCENDING)])
+        # Remove the unique constraint from the compound index
         messages_collection.create_index([
             ('user_id', ASCENDING),
             ('title', ASCENDING)
-        ], unique=True)
+        ])
         print("Messages collection created successfully with indexes")
 
     # Create tokens collection if it doesn't exist
