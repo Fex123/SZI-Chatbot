@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_restx import Resource
 from swagger_config import create_swagger_api
 from flask_httpauth import HTTPTokenAuth
 from auth.token_manager import TokenManager
