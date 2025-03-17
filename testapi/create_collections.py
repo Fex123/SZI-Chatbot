@@ -5,11 +5,30 @@ def init_mongodb_collections():
     client = MongoClient(Config.MONGO_URI)
     db = client[Config.MONGO_DB_NAME]
     
-    # Create users collection if it doesn't exist
+    # Create users collection with schema validation
     if 'users' not in db.list_collection_names():
-        users_collection = db.create_collection('users')
-        users_collection.create_index([('user_id', 1)], unique=True)
-        print("Users collection created successfully with indexes")
+        db.create_collection('users', validator={
+            '$jsonSchema': {
+                'bsonType': 'object',
+                'required': ['user_id', 'username', 'password_hash', 'created_at'],
+                'properties': {
+                    'user_id': {'bsonType': 'string'},
+                    'username': {'bsonType': 'string'},
+                    'display_name': {'bsonType': 'string'},
+                    'password_hash': {'bsonType': 'string'},
+                    'created_at': {'bsonType': 'date'},
+                    'last_login': {'bsonType': ['date', 'null']},
+                    'is_active': {'bsonType': 'bool'},
+                    'conversations': {'bsonType': 'array'}
+                }
+            }
+        })
+        
+        users_collection = db.users
+        # Create indexes
+        users_collection.create_index([('user_id', ASCENDING)], unique=True)
+        users_collection.create_index([('username', ASCENDING)], unique=True)
+        print("Users collection created successfully with schema validation and indexes")
     
     # Create messages collection if it doesn't exist
     if 'messages' not in db.list_collection_names():
@@ -22,6 +41,15 @@ def init_mongodb_collections():
             ('title', ASCENDING)
         ], unique=True)
         print("Messages collection created successfully with indexes")
+
+    # Create tokens collection if it doesn't exist
+    if 'tokens' not in db.list_collection_names():
+        tokens_collection = db.create_collection('tokens')
+        # Create indexes for token management
+        tokens_collection.create_index([('token', ASCENDING)], unique=True)
+        tokens_collection.create_index([('user_id', ASCENDING)])
+        tokens_collection.create_index([('expiry', ASCENDING)])
+        print("Tokens collection created successfully with indexes")
 
     client.close()
     print("All collections initialized successfully!")
