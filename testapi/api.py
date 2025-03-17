@@ -1,15 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPTokenAuth
-from auth.token_manager import TokenManager
-from pydantic import BaseModel, ValidationError
 from flask_cors import CORS
-from typing import Optional
+from auth.token_manager import TokenManager
+from pydantic import ValidationError
 from db_connections import DatabaseConnections
 from config import Config
-from datetime import datetime
 from utils.bcrypt_singleton import BcryptSingleton
 from controllers.auth_controller import AuthController
 from controllers.message_controller import MessageController
+from models.request_models import SendMessageRequest, UserCreateRequest, LoginRequest
+from models.response_models import ConversationResponse, MessageResponse, UserResponse
 from services.validation_service import ValidationService
 from services.user_service import UserService
 from services.message_service import MessageService
@@ -33,41 +33,6 @@ db_conn.connect_all()
 user_service = UserService()
 message_controller = MessageController()
 auth_controller = AuthController()
-
-"""
-    Request Body Classes:
-"""
-class SendMessageRequest(BaseModel):
-    query: str
-    conversation_id: Optional[str] = None
-    # Remove default user_id as it will come from authentication
-
-class UserCreateRequest(BaseModel):
-    username: str
-    password: str
-    display_name: Optional[str] = None
-
-    model_config = ValidationService.get_model_config()
-    validate_username = ValidationService.validate_username
-    validate_password = ValidationService.validate_password
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-"""
-    Response Classes:
-"""
-class ConversationResponse(BaseModel):
-    id: str
-    title: str
-    created_at: datetime
-    updated_at: Optional[datetime]
-
-class MessageResponse(BaseModel):
-    role: str
-    content: str
-    created_at: datetime
 
 @auth.verify_token
 def verify_token(token):
@@ -269,7 +234,9 @@ def get_user_conversations():
         conversations = message_controller.message_service.get_formatted_conversations(
             current_user['user_id']
         )
-        return jsonify({'conversations': conversations}), 200
+        return jsonify({
+            'conversations': [ConversationResponse(**conv).model_dump() for conv in conversations]
+        }), 200
         
     except Exception as e:
         print(f"Error in get_user_conversations: {e}")
@@ -340,12 +307,7 @@ def get_profile():
         if not current_user:
             return jsonify({'error': 'Authentication failed'}), 401
 
-        return jsonify({
-            'user_id': current_user['user_id'],
-            'username': current_user['username'],
-            'display_name': current_user['display_name'],
-            'created_at': current_user['created_at']
-        })
+        return jsonify(UserResponse(**current_user).model_dump())
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
