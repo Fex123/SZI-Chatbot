@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from swagger_config import create_swagger_api
 from flask_httpauth import HTTPTokenAuth
 from auth.token_manager import TokenManager
 from pydantic import ValidationError
@@ -15,10 +14,6 @@ from services.user_service import UserService
 
 app = Flask(__name__)
 CORS(app)
-
-# Initialize Swagger
-api = create_swagger_api()
-api.init_app(app)
 
 # Initialize Bcrypt singleton with app FIRST
 bcrypt_singleton = BcryptSingleton.get_instance()
@@ -46,7 +41,7 @@ Root endpoint
 GET /
 Returns a welcome message
 """
-@api.route('/')
+@app.route('/')
 def home():
     return "Welcome to the chat API!"
 
@@ -61,7 +56,7 @@ Request body:
     "display_name": "John Doe"
 }
 """
-@api.route('/api/auth/register', methods=['POST'])
+@app.route('/api/auth/register', methods=['POST'])
 def register():
     try:
         data = UserCreateRequest(**request.json)
@@ -102,7 +97,7 @@ Response:
     }
 }
 """
-@api.route('/api/auth/login', methods=['POST'])
+@app.route('/api/auth/login', methods=['POST'])
 def login():
     try:
         data = LoginRequest(**request.json)
@@ -128,7 +123,7 @@ def login():
 Logout user
 POST /api/auth/logout
 """
-@api.route('/api/auth/logout', methods=['POST'])
+@app.route('/api/auth/logout', methods=['POST'])
 @auth.login_required
 def logout():
     token = request.headers.get('Authorization').split(' ')[1]
@@ -158,7 +153,7 @@ curl -X POST http://localhost:5000/api/chat/send \
     -H "Content-Type: application/json" \
     -d '{"query": "Hello, how are you?", "conversation_id": "507f1f77bcf86cd799439011"}'
 """
-@api.route('/api/chat/send', methods=['POST'])
+@app.route('/api/chat/send', methods=['POST'])
 @auth.login_required
 def send_message():
     try:
@@ -226,7 +221,7 @@ Response:
 Example curl:
 curl "http://localhost:5000/api/conversations?user_id=dev_user"
 """
-@api.route('/api/conversations', methods=['GET'])
+@app.route('/api/conversations', methods=['GET'])
 @auth.login_required
 def get_user_conversations():
     try:
@@ -273,7 +268,7 @@ Response:
 Example curl:
 curl "http://localhost:5000/api/conversations/507f1f77bcf86cd799439011/messages?user_id=dev_user"
 """
-@api.route('/api/conversations/<conversation_id>/messages', methods=['GET'])
+@app.route('/api/conversations/<conversation_id>/messages', methods=['GET'])
 @auth.login_required
 def get_conversation_messages(conversation_id):
     try:
@@ -300,19 +295,6 @@ def get_conversation_messages(conversation_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-""" PROBABLY NOT NEEDED """
-# Use similar pattern for other endpoints that need user context
-@api.route('/api/auth/profile', methods=['GET'])
-@auth.login_required
-def get_profile():
-    try:
-        current_user = auth_controller.get_user_from_request(request, token_manager)
-        if not current_user:
-            return jsonify({'error': 'Authentication failed'}), 401
-
-        return jsonify(UserResponse(**current_user).model_dump())
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host= "0.0.0.0", port= 3104, debug=Config.DEBUG)
