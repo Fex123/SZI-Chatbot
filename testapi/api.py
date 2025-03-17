@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
-from flask_httpauth import HTTPTokenAuth
 from flask_cors import CORS
+from swagger_config import create_swagger_api
+from flask_httpauth import HTTPTokenAuth
 from auth.token_manager import TokenManager
 from pydantic import ValidationError
 from db_connections import DatabaseConnections
@@ -14,6 +15,10 @@ from services.user_service import UserService
 
 app = Flask(__name__)
 CORS(app)
+
+# Initialize Swagger
+api = create_swagger_api()
+api.init_app(app)
 
 # Initialize Bcrypt singleton with app FIRST
 bcrypt_singleton = BcryptSingleton.get_instance()
@@ -41,7 +46,7 @@ Root endpoint
 GET /
 Returns a welcome message
 """
-@app.route('/')
+@api.route('/')(api.doc(False)(home))  # Hide root endpoint from Swagger
 def home():
     return "Welcome to the chat API!"
 
@@ -56,7 +61,7 @@ Request body:
     "display_name": "John Doe"
 }
 """
-@app.route('/api/auth/register', methods=['POST'])
+@api.route('/api/auth/register', methods=['POST'])
 def register():
     try:
         data = UserCreateRequest(**request.json)
@@ -97,7 +102,7 @@ Response:
     }
 }
 """
-@app.route('/api/auth/login', methods=['POST'])
+@api.route('/api/auth/login', methods=['POST'])
 def login():
     try:
         data = LoginRequest(**request.json)
@@ -123,7 +128,7 @@ def login():
 Logout user
 POST /api/auth/logout
 """
-@app.route('/api/auth/logout', methods=['POST'])
+@api.route('/api/auth/logout', methods=['POST'])
 @auth.login_required
 def logout():
     token = request.headers.get('Authorization').split(' ')[1]
@@ -153,7 +158,7 @@ curl -X POST http://localhost:5000/api/chat/send \
     -H "Content-Type: application/json" \
     -d '{"query": "Hello, how are you?", "conversation_id": "507f1f77bcf86cd799439011"}'
 """
-@app.route('/api/chat/send', methods=['POST'])
+@api.route('/api/chat/send', methods=['POST'])
 @auth.login_required
 def send_message():
     try:
@@ -221,7 +226,7 @@ Response:
 Example curl:
 curl "http://localhost:5000/api/conversations?user_id=dev_user"
 """
-@app.route('/api/conversations', methods=['GET'])
+@api.route('/api/conversations', methods=['GET'])
 @auth.login_required
 def get_user_conversations():
     try:
@@ -268,7 +273,7 @@ Response:
 Example curl:
 curl "http://localhost:5000/api/conversations/507f1f77bcf86cd799439011/messages?user_id=dev_user"
 """
-@app.route('/api/conversations/<conversation_id>/messages', methods=['GET'])
+@api.route('/api/conversations/<conversation_id>/messages', methods=['GET'])
 @auth.login_required
 def get_conversation_messages(conversation_id):
     try:
@@ -297,7 +302,7 @@ def get_conversation_messages(conversation_id):
 
 """ PROBABLY NOT NEEDED """
 # Use similar pattern for other endpoints that need user context
-@app.route('/api/auth/profile', methods=['GET'])
+@api.route('/api/auth/profile', methods=['GET'])
 @auth.login_required
 def get_profile():
     try:
