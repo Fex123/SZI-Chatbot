@@ -71,27 +71,40 @@ class MessageService:
             
         return [conversation] if conversation else []
 
+    def _generate_unique_title(self, user_id, base_title):
+        """Generate a unique title by adding a suffix number if needed"""
+        title = base_title
+        counter = 1
+        
+        while True:
+            # Check if this title exists
+            existing = self.messages_collection.find_one({
+                'user_id': user_id,
+                'title': title
+            })
+            
+            if not existing:
+                return title
+                
+            # Add or increment counter suffix
+            title = f"{base_title} ({counter})"
+            counter += 1
+
     def create_conversation(self, user_id, title=None):
         conversation_id = str(ObjectId())
         now = datetime.now()
+        
+        base_title = title or "New Conversation"
+        unique_title = self._generate_unique_title(user_id, base_title)
+        
         conversation_doc = {
             'conversation_id': conversation_id,
             'user_id': user_id,
-            'title': title or "New Conversation",
+            'title': unique_title,
             'created_at': now,
             'updated_at': now
         }
         
-        # Check if conversation already exists
-        existing_conv = self.messages_collection.find_one({
-            'user_id': user_id,
-            'title': conversation_doc['title']
-        })
-        
-        if existing_conv:
-            return existing_conv
-            
-        # Use insert_one with unique index to prevent duplicates
         self.messages_collection.insert_one(conversation_doc)
         return conversation_doc
 
