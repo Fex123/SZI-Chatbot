@@ -46,7 +46,7 @@ Root endpoint
 GET /
 Returns a welcome message
 """
-@api.route('/')(api.doc(False)(home))  # Hide root endpoint from Swagger
+@api.route('/')
 def home():
     return "Welcome to the chat API!"
 
