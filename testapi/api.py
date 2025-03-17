@@ -298,4 +298,4 @@ def get_conversation_messages(conversation_id):
 
 
 if __name__ == '__main__':
-    app.run(host= "0.0.0.0", port= 3104, debug=Config.DEBUG)
+    app.run(host= "0.0.0.0", port= 3104, debug=Config.DEBUG, threaded=True)
