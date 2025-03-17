@@ -3,6 +3,7 @@ from datetime import datetime
 from bson import ObjectId
 
 # TODO: Refactor this class to be more modular and clean
+# Also move into ./services directory
 """
 MessageService class
 Responsible for handling message operations in the database
