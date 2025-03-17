@@ -204,20 +204,19 @@ def send_message():
             data['conversation_id'] = None
             
         request_params = SendMessageRequest(**data)
-        request_params.user_id = current_user['user_id']  # Use authenticated user's ID
 
-        # Process message using service
+        # Process message using service class
         conversation_id = message_controller.message_service.process_message(
             request_params.query,
             request_params.conversation_id,
-            request_params.user_id
+            current_user['user_id']  # Use current_user directly
         )
 
         # Send message to Dify
         result = message_controller.send_message_to_dify(
             query=request_params.query,
             conversation_id=conversation_id,
-            user_id=request_params.user_id
+            user_id=current_user['user_id']  # Use current_user directly
         )
 
         # Set default title for new conversations
