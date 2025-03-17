@@ -5,7 +5,7 @@ from services.user_service import UserService
 
 """
 Message Controller class
-Responsible for creating requests to Dify API
+Responsible for making requests to Dify API
 """
 class MessageController:
     def __init__(self):

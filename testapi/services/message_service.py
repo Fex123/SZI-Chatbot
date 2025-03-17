@@ -1,10 +1,9 @@
 from db_connections import DatabaseConnections
 from datetime import datetime
 from bson import ObjectId
-from typing import Dict, List, Optional, Union
-from models.message import Message
-from models.conversation import Conversation
 
+# TODO: Refactor this class to be more modular and clean
+# Also move into ./services directory
 """
 MessageService class
 Responsible for handling message operations in the database
@@ -14,107 +13,54 @@ class MessageService:
         db = DatabaseConnections().get_mongodb()
         self.messages_collection = db.messages
 
-    # Validation Methods
-    def _validate_user_id(self, user_id: str) -> None:
+    def save_message(self, conversation_id, user_message, ai_response, user_id):
+        # Validate user_id is provided
         if not user_id:
             raise ValueError("user_id is required")
-
-    def _validate_conversation_exists(self, conversation_id: str, user_id: str) -> Dict:
-        conversation = self.messages_collection.find_one({
-            'conversation_id': conversation_id,
-            'user_id': user_id
-        })
-        if not conversation:
-            raise ValueError("Conversation not found or access denied")
-        return conversation
-
-    # Conversation Management
-    def create_conversation(self, user_id: str, title: Optional[str] = None) -> Conversation:
-        self._validate_user_id(user_id)
-        now = datetime.now()
-        conversation = Conversation(
-            conversation_id=str(ObjectId()),
-            user_id=user_id,
-            title=title or "New Conversation",
-            messages=[],
-            created_at=now,
-            updated_at=now
-        )
-        self.messages_collection.insert_one(conversation.model_dump())
-        return conversation
-
-    def get_conversations(self, user_id: str) -> List[Dict]:
-        self._validate_user_id(user_id)
-        return list(self.messages_collection.find(
-            {'user_id': user_id},
-            {'_id': 0, 'conversation_id': 1, 'title': 1, 'created_at': 1, 'updated_at': 1}
-        ).sort('created_at', -1))
-
-    def update_conversation_title(self, conversation_id: str, new_title: str) -> bool:
-        result = self.messages_collection.update_one(
-            {'conversation_id': conversation_id},
-            {'$set': {'title': new_title, 'updated_at': datetime.now()}}
-        )
-        return result.modified_count > 0
-
-    def get_formatted_conversations(self, user_id: str) -> List[Dict]:
-        self._validate_user_id(user_id)
         
-        conversations = self.get_conversations(user_id)
-        return [{
-            'id': conv['conversation_id'],
-            'title': conv.get('title', 'Untitled Chat'),
-            'created_at': conv['created_at'],
-            'updated_at': conv['updated_at']
-        } for conv in conversations]
-
-    # Message Operations
-    def save_message(self, conversation_id: str, user_message: str, ai_response: str, user_id: str) -> str:
-        self._validate_user_id(user_id)
         now = datetime.now()
-        
-        messages = [
-            Message(role='user', content=user_message, timestamp=now),
-            Message(role='assistant', content=ai_response, timestamp=now)
+        message_pair = [
+            {'role': 'user', 'content': user_message, 'timestamp': now},
+            {'role': 'assistant', 'content': ai_response, 'timestamp': now}
         ]
-
-        if not conversation_id:
-            return self._create_new_conversation_with_messages(user_id, messages, user_message)
         
-        return self._add_messages_to_existing_conversation(conversation_id, user_id, messages)
-
-    def _create_new_conversation_with_messages(self, user_id: str, messages: List[Message], 
-                                            initial_message: str) -> str:
-        conversation = self.create_conversation(
-            user_id=user_id,
-            title=f"Chat about: {initial_message[:30]}..."
-        )
-        self.messages_collection.update_one(
-            {'conversation_id': conversation.conversation_id},
-            {'$set': {'messages': [m.model_dump() for m in messages]}}
-        )
-        return conversation.conversation_id
-
-    def _add_messages_to_existing_conversation(self, conversation_id: str, user_id: str, 
-                                           messages: List[Message]) -> str:
-        self._validate_conversation_exists(conversation_id, user_id)
-        self.messages_collection.update_one(
-            {'conversation_id': conversation_id},
-            {
-                '$push': {'messages': {'$each': [m.model_dump() for m in messages]}},
-                '$set': {'updated_at': datetime.now()}
+        # Try to find existing conversation
+        existing_conv = self.messages_collection.find_one({'conversation_id': conversation_id})
+        
+        if existing_conv:
+            # Update existing conversation with new messages
+            result = self.messages_collection.update_one(
+                {'conversation_id': conversation_id},
+                {
+                    '$push': {'messages': {'$each': message_pair}},
+                    '$set': {'updated_at': now}
+                }
+            )
+        else:
+            # Create new conversation document
+            message_doc = {
+                'conversation_id': conversation_id,
+                'user_id': user_id,  # Add user_id to new conversations
+                'messages': message_pair,
+                'created_at': now, 
+                'updated_at': now,
+                'title': f"Chat about: {user_message[:30]}..."
             }
-        )
+            result = self.messages_collection.insert_one(message_doc)
+        
         return conversation_id
 
-    def get_conversation_history(self, conversation_id: str, user_id: str) -> List[Dict]:
-        self._validate_user_id(user_id)
-        
+    def load_message(self, conversation_id):
+        return self.messages_collection.find_one({'conversation_id': conversation_id})
+
+    def get_conversation_history(self, conversation_id, user_id=None):
+        """Get conversation history with optional user validation"""
+        query = {'conversation_id': conversation_id}
+        if user_id:
+            query['user_id'] = user_id  # User check if user_id provided
+            
         conversation = self.messages_collection.find_one(
-            {
-                'conversation_id': conversation_id,
-                'user_id': user_id
-            },
+            query,
             {
                 'messages': 1,
                 'created_at': 1,
@@ -122,20 +68,117 @@ class MessageService:
             }
         )
         
-        if not conversation:
-            return []
+        if not conversation and user_id:
+            raise ValueError('Conversation not found or access denied')
             
-        return [conversation]
+        return [conversation] if conversation else []
 
-    def process_message(self, query: str, conversation_id: Optional[str], 
-                       user_id: str) -> Optional[str]:
-        self._validate_user_id(user_id)
+    def create_conversation(self, user_id, title=None):
+        conversation_id = str(ObjectId())
+        now = datetime.now()
+        conversation_doc = {
+            'conversation_id': conversation_id,
+            'user_id': user_id,
+            'title': title or "New Conversation",
+            'created_at': now,
+            'updated_at': now
+        }
         
-        if not conversation_id:
+        # Check if conversation already exists
+        existing_conv = self.messages_collection.find_one({
+            'user_id': user_id,
+            'title': conversation_doc['title']
+        })
+        
+        if existing_conv:
+            return existing_conv
+            
+        # Use insert_one with unique index to prevent duplicates
+        self.messages_collection.insert_one(conversation_doc)
+        return conversation_doc
+
+    def get_conversations(self, user_id):
+        """
+        Get all conversations for a user with their details
+        Returns cursor of conversations with id, title, and timestamps
+        """
+        return self.messages_collection.find(
+            {'user_id': user_id},
+            {
+                '_id': 0,
+                'conversation_id': 1,
+                'title': 1,
+                'created_at': 1,
+                'updated_at': 1
+            }
+        ).sort('created_at', -1)
+
+    def update_conversation_title(self, conversation_id, new_title):
+        return self.messages_collection.update_one(
+            {'conversation_id': conversation_id},
+            {'$set': {'title': new_title, 'updated_at': datetime.now()}}
+        )
+
+    def validate_conversation(self, conversation_id, user_id):
+        """
+        Validates if a conversation exists and belongs to the user
+        Returns the conversation if valid, None if empty ID, raises Exception if invalid
+        """
+        if not conversation_id or conversation_id.strip() == "":
+            return None
+            
+        conversation = self.messages_collection.find_one({
+            'conversation_id': conversation_id,
+            'user_id': user_id
+        })
+        
+        if not conversation:
+            raise ValueError(f"Conversation {conversation_id} not found or does not belong to user {user_id}")
+            
+        return conversation
+
+    def process_message(self, query, conversation_id, user_id):
+        """
+        Process and validate a new message
+        Returns validated conversation_id or None if invalid
+        """
+        if not user_id:
+            raise ValueError("user_id is required")
+            
+        if not conversation_id or conversation_id.strip() == "":
             return None
             
         try:
-            self._validate_conversation_exists(conversation_id, user_id)
-            return conversation_id
+            conversation = self.validate_conversation(conversation_id, user_id)
+            if not conversation:
+                return None
         except ValueError:
             return None
+            
+        return conversation_id
+
+    def get_formatted_conversations(self, user_id):
+        """
+        Get and format all conversations for a user
+        Returns list of formatted conversation dictionaries
+        """
+        if not user_id:
+            raise ValueError("user_id is required")
+            
+        conversations = self.get_conversations(user_id)
+        formatted_conversations = []
+        
+        for conv in conversations:
+            try:
+                formatted_conv = {
+                    'id': conv.get('conversation_id'),
+                    'title': conv.get('title', 'Untitled Chat'),
+                    'created_at': conv.get('created_at', datetime.now()),
+                    'updated_at': conv.get('updated_at')
+                }
+                formatted_conversations.append(formatted_conv)
+            except Exception as e:
+                print(f"Error formatting conversation: {e}")
+                continue
+                
+        return formatted_conversations
