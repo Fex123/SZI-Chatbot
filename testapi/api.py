@@ -16,20 +16,23 @@ from services.message_service import MessageService
 
 app = Flask(__name__)
 CORS(app)
+
+# Initialize Bcrypt singleton with app FIRST
+bcrypt_singleton = BcryptSingleton.get_instance()
+bcrypt_singleton.init_bcrypt(app)
+
+# Initialize auth components AFTER bcrypt is ready
 auth = HTTPTokenAuth(scheme='Bearer')
 token_manager = TokenManager()
-auth_controller = AuthController()
 
-# Initialize Bcrypt singleton with app
-BcryptSingleton.get_instance().init_bcrypt(app)
-
-# Initialize database connection once
+# Initialize database connection
 db_conn = DatabaseConnections()
 db_conn.connect_all()
 
-# Initialize services
-message_controller = MessageController()
+# Initialize rest of services AFTER bcrypt and database are ready
 user_service = UserService()
+message_controller = MessageController()
+auth_controller = AuthController()
 
 """
     Request Body Classes:
