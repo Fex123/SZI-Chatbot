@@ -2,7 +2,7 @@ from services.user_service import UserService  # Updated import
 
 """
 AuthController class
-Responsible for handling user authentication and token verification
+Responsible for checking user authentication and token verification
 """
 class AuthController:
     def __init__(self):
