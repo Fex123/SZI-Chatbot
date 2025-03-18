@@ -58,12 +58,17 @@ class ProfilePic extends Component<{}, ProfilePicState> {
       await logoutUser();
       sessionStorage.removeItem('loginResponse-plaiooijdjfpakij103978128739807298312');
       this.setState({ isModalOpen: false });
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
     }
   };
 
   render() {
+
+    const sessionToken = sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312');
+    const username = sessionToken ? JSON.parse(sessionToken).user.username : 'Unknown User';
+
     return (
       <div>
         <div className="profile-pic-circle" onClick={this.toggleModal}>
@@ -73,7 +78,7 @@ class ProfilePic extends Component<{}, ProfilePicState> {
           <div className="user-modal" ref={this.modalRef}>
             <div className="modal-content">
               <div className="modal-user-info">
-                mustermannm@dhbw-loerrach.de
+                {username}
               </div>
               <div style={{ border: '1px solid #acacac', margin: '10px 0' }}></div>
               <div className="modal-button" onClick={this.handleLogout}>                {signoutSvg}

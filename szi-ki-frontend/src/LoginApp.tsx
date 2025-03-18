@@ -11,7 +11,7 @@ const Login: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
-  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,11 +34,11 @@ const Login: React.FC = () => {
         navigate('/app');
       } catch (error) {
         console.error('Login failed:', error);
-
+        setErrorMessage('Login fehlgeschlagen. ' + error);
       }
     } else {
       if (password !== confirmPassword) {
-        console.log('Passwords do not match');
+        setErrorMessage("Passwörter stimmen nicht überein.");
         return;
       }
       try {
@@ -46,10 +46,10 @@ const Login: React.FC = () => {
         console.log('Registration successful:', response);
 
         setIsLogin(true);
-        setFeedbackMessage('Erfolgreich registriert!');
+        setErrorMessage('Erfolgreich registriert!');
       } catch (error) {
         console.error('Registration failed:', error);
-
+        setErrorMessage('Registration fehlgeschlagen. ' + error);
       }
     }
   };
@@ -60,7 +60,6 @@ const Login: React.FC = () => {
 
   const toggleLoginState = () => {
     setIsLogin((prevIsLogin) => !prevIsLogin);
-    setFeedbackMessage('');
   };
 
   return (
@@ -74,7 +73,6 @@ const Login: React.FC = () => {
       </div>
       <form className="login-form" onSubmit={handleSubmit}>
         <h1>{isLogin ? 'Anmelden' : 'Registrieren'}</h1>
-        {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>}
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
@@ -110,10 +108,12 @@ const Login: React.FC = () => {
             />
           </div>
         )}
+        {/*
         <div className="form-group">
           <a href="#" className="forgot-password">Passwort vergessen?</a>
         </div>
-
+        */
+        }
         {isLogin ? (
           <div className="form-group">
             <button type="submit" className="login-register-button">Anmelden</button>
@@ -133,6 +133,13 @@ const Login: React.FC = () => {
           </div>
         )}
       </form>
+      {errorMessage !== "" ? (
+
+        <div className="error-message">
+
+          {errorMessage}
+
+        </div>) : null}
     </div>
   );
 };
