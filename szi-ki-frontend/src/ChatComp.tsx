@@ -197,7 +197,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
               ))
             ) : (
               <div className="no-messages">
-                <h1>Wilkommen!</h1>
+                <h1>Willkommen!</h1>
                 <div className="intro-text-wrapper">
                   <div className="intro-text">Ich bin der SZI-Assistent! <br /> Du kannst mir Fragen rund um das Studienzentrum Informatik stellen!</div>
                   <div className="intro-text faq-style"> <br />Häufig gestellte Fragen:</div>
