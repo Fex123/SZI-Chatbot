@@ -1,7 +1,7 @@
 const API_URL = 'http://localhost:3104'; //"http://localhost:3104"; 
 
 export const fetchConversationTitles = async () => {
-  const token = sessionStorage.getItem('loginResponse') ? JSON.parse(sessionStorage.getItem('loginResponse')!).token : null;
+  const token = sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312') ? JSON.parse(sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312')!).token : null;
   const response = await fetch(`${API_URL}/api/conversations`, {
     method: 'GET',
     headers: {
@@ -20,7 +20,7 @@ export const fetchConversationTitles = async () => {
 }
 
 export const fetchConversationMessages = async (conversation_id: string) => {
-  const token = sessionStorage.getItem('loginResponse') ? JSON.parse(sessionStorage.getItem('loginResponse')!).token : null;
+  const token = sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312') ? JSON.parse(sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312')!).token : null;
   const response = await fetch(`${API_URL}/api/conversations/${conversation_id}/messages`, {
     method: 'GET',
     headers: {
@@ -41,7 +41,7 @@ export const fetchConversationMessages = async (conversation_id: string) => {
 }
 
 export const sendMessage = async (conversation_id: string, message: string) => {
-  const token = sessionStorage.getItem('loginResponse') ? JSON.parse(sessionStorage.getItem('loginResponse')!).token : null;
+  const token = sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312') ? JSON.parse(sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312')!).token : null;
   const response = await fetch(`${API_URL}/api/chat/send`, {
     method: 'POST',
     headers: {
@@ -100,6 +100,25 @@ export const registerUser = async (username: string, password: string, displayNa
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || 'Registration failed');
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+export const logoutUser = async () => {
+  const token = sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312') ? JSON.parse(sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312')!).token : null;
+  const response = await fetch(`${API_URL}/api/auth/logout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Logout failed');
   }
 
   const data = await response.json();

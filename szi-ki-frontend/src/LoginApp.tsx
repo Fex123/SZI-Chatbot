@@ -28,7 +28,8 @@ const Login: React.FC = () => {
       try {
         const response = await loginUser(email, password);
         console.log('Login successful:', response);
-        sessionStorage.setItem('loginResponse', JSON.stringify(response));
+        sessionStorage.removeItem('loginResponse-plaiooijdjfpakij103978128739807298312');
+        sessionStorage.setItem('loginResponse-plaiooijdjfpakij103978128739807298312', JSON.stringify(response));
 
         navigate('/app');
       } catch (error) {

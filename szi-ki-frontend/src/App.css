@@ -510,6 +510,12 @@ svg {
 
 }
 
+.signout-text:hover {
+
+  color: #ff000d;
+
+}
+
 .chat-top-bar-buttons {
   display: flex;
   align-items: center;
