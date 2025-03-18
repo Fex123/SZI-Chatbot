@@ -47,7 +47,6 @@ const Login: React.FC = () => {
 
         setIsLogin(true);
         setFeedbackMessage('Erfolgreich registriert!');
-        navigate('/app');
       } catch (error) {
         console.error('Registration failed:', error);
 
