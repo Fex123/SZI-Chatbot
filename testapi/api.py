@@ -11,6 +11,7 @@ from controllers.message_controller import MessageController
 from models.request_models import SendMessageRequest, UserCreateRequest, LoginRequest
 from models.response_models import ConversationResponse, MessageResponse, UserResponse
 from services.user_service import UserService
+from services.top_queries_service import TopQueriesService
 
 app = Flask(__name__)
 # TODO: man kann sowas implementieren: CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
@@ -32,6 +33,7 @@ db_conn.connect_all()
 user_service = UserService()
 message_controller = MessageController()
 auth_controller = AuthController()
+top_queries_service = TopQueriesService(update_interval_days=7)  # Top Queries set to weekly updates
 
 @auth.verify_token
 def verify_token(token):
@@ -293,6 +295,30 @@ def get_conversation_messages(conversation_id):
         ]
         
         return jsonify({'messages': formatted_messages}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+"""
+Get top queries
+GET /api/top-queries
+
+Response:
+{
+    "queries": ["query1", "query2", "query3"],
+    "last_updated": "2024-02-21T15:30:00.000Z"
+}
+"""
+@app.route('/api/top-queries', methods=['GET'])
+def get_top_queries():
+    try:
+        # Try to update if needed (daily check)
+        top_queries_service.update_top_queries()
+        
+        # Get latest queries
+        queries = top_queries_service.get_latest_top_queries()
+        return jsonify({
+            'queries': queries
+        }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

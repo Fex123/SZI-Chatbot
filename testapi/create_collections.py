@@ -52,6 +52,14 @@ def init_mongodb_collections():
         tokens_collection.create_index([('expiry', ASCENDING)])
         print("Tokens collection created successfully with indexes")
 
+    # Create top_queries collection if it doesn't exist
+    if 'top_queries' not in db.list_collection_names():
+        top_queries_collection = db.create_collection('top_queries')
+        # Create indexes for efficient querying
+        top_queries_collection.create_index([('created_at', ASCENDING)])
+        top_queries_collection.create_index([('query', ASCENDING)])
+        print("Top queries collection created successfully with indexes")
+
     client.close()
     print("All collections initialized successfully!")
 
