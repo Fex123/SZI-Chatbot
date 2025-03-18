@@ -28,30 +28,28 @@ const Login: React.FC = () => {
       try {
         const response = await loginUser(email, password);
         console.log('Login successful:', response);
-        // Save login response to session storage
         sessionStorage.setItem('loginResponse', JSON.stringify(response));
-        // Handle successful login
-        navigate('/app'); // Redirect to the main app
+
+        navigate('/app');
       } catch (error) {
         console.error('Login failed:', error);
-        // Handle login error
+
       }
     } else {
       if (password !== confirmPassword) {
         console.log('Passwords do not match');
-        // Handle error
         return;
       }
       try {
-        const response = await registerUser(email, password, email); // Assuming display name is the same as email
+        const response = await registerUser(email, password, email);
         console.log('Registration successful:', response);
-        // Handle successful registration
+
         setIsLogin(true);
         setFeedbackMessage('Erfolgreich registriert!');
-        navigate('/app'); // Redirect to the main app after registration
+        navigate('/app');
       } catch (error) {
         console.error('Registration failed:', error);
-        // Handle registration error
+
       }
     }
   };

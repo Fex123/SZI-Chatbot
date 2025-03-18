@@ -1,10 +1,8 @@
 const API_URL = 'http://localhost:3104'; //"http://localhost:3104"; 
-const API_user = "dev_user"; //TODO: 
 
-// Fetches Conversation IDs and Titles, ** without message history **
 export const fetchConversationTitles = async () => {
   const token = sessionStorage.getItem('loginResponse') ? JSON.parse(sessionStorage.getItem('loginResponse')!).token : null;
-  const response = await fetch(`${API_URL}/api/conversations?user_id=${API_user}`, {
+  const response = await fetch(`${API_URL}/api/conversations`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -23,7 +21,7 @@ export const fetchConversationTitles = async () => {
 
 export const fetchConversationMessages = async (conversation_id: string) => {
   const token = sessionStorage.getItem('loginResponse') ? JSON.parse(sessionStorage.getItem('loginResponse')!).token : null;
-  const response = await fetch(`${API_URL}/api/conversations/${conversation_id}/messages?user_id=${API_user}`, {
+  const response = await fetch(`${API_URL}/api/conversations/${conversation_id}/messages`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
