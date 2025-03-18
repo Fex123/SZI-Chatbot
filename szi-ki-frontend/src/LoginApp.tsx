@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './App.css';
-import DarkModeToggle from './Dmtoggle';
 import logo from './assets/logo.svg';
 import { loginUser, registerUser } from './helper';
 import { useNavigate } from 'react-router-dom';
@@ -52,10 +51,6 @@ const Login: React.FC = () => {
         setErrorMessage('Registration fehlgeschlagen. ' + error);
       }
     }
-  };
-
-  const toggleDarkMode = () => {
-    setDarkMode((prevDarkMode) => !prevDarkMode);
   };
 
   const toggleLoginState = () => {
