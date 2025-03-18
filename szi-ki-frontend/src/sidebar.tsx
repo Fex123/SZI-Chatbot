@@ -12,17 +12,18 @@ interface SidebarProps {
   setSelectedChat: (chat: Chat) => void;
   toggleDarkmode: () => void;
   chats: Chat[];
+  errorMessage: string;
 }
 
 interface SidebarState {
-  lastDate: string | null;
+
 }
 
 class Sidebar extends Component<SidebarProps, SidebarState> {
   constructor(props: SidebarProps) {
     super(props);
     this.state = {
-      lastDate: null,
+
     };
   }
 
@@ -58,13 +59,13 @@ class Sidebar extends Component<SidebarProps, SidebarState> {
   }
 
   render() {
-    const { chats } = this.props;
+    const { chats, errorMessage } = this.props;
     const groupedChats = this.groupChatsByDate(chats);
 
     return (
       <div className="sidebar">
         <div className="sidebar-top-logo">
-          <img src={logo} alt="Logo" className="dhbw-logo" title="Create new chat"/>
+          <img src={logo} alt="Logo" className="dhbw-logo" title="Create new chat" />
         </div>
         <div className="sidebar-top-bar" onClick={() => this.setChat(new Chat("", "", [], new Date(), true))}>
           <button className='dark-mode-button' >
@@ -72,6 +73,13 @@ class Sidebar extends Component<SidebarProps, SidebarState> {
           </button>
           <p className='new-chat'>Neuer Chat</p>
         </div>
+        {errorMessage ? (
+
+          <div className="error-message">
+
+            {errorMessage}
+
+          </div>) : null}
         {this.renderGroupedChats(groupedChats)
 
         }
