@@ -67,20 +67,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
-    /* TODO: When testing with backend, Make sure error handling works when fetching chats
-    
-      fetchAndAddMessages = async (chat: Chat) => {
-  try {
-    let messages = await fetchConversationMessages(chat.conversation_id);
-    chat.messages = messages;
-    chat.registered = true;
-    this.setState({});
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-    this.setState({ errorMessage: `Error fetching messages. \n \n ${error}`, isError: true });
-  }
-};
-    */
+
   };
 
   handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
