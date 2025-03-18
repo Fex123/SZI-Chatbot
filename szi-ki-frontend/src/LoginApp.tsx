@@ -65,7 +65,7 @@ const Login: React.FC = () => {
   return (
     <div className={`login-container ${darkMode ? 'dark' : ''}`}>
       <div className="login-top-bar">
-        <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
+        {/*<DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />*/}
       </div>
       <div className="login-logo">
         <img src={logo} alt="Logo" className="dhbw-logo" title="Create new chat" />
