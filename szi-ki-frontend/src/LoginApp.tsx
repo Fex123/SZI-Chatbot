@@ -8,7 +8,6 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [darkMode, setDarkMode] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
@@ -58,7 +57,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className={`login-container ${darkMode ? 'dark' : ''}`}>
+    <div className={`login-container`}>
       <div className="login-top-bar">
         {/*<DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />*/}
       </div>
