@@ -3,11 +3,6 @@ services:
   szi-ki-frontend:
     build:
       context: ./szi-ki-frontend
-    #needed for server!!
-    #delete volumes for local
-    volumes:
-      - ./webserver:/usr/local/apache2/htdocs/
-      - ./webserver/httpd.conf:/usr/local/apache2/conf/httpd.conf
     ports:
       - "3105:80"
   mongo:
