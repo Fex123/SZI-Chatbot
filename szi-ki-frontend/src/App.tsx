@@ -18,7 +18,6 @@ function App() {
       try {
         const response = await fetchConversationTitles();
         const conversations = response.conversations;
-        //TODO: Check wieso das nichts zurück gibt??? Das kann nicht sein alter
         const fetchedChats = conversations.map((conversation: { id: string, title: string, created_at: string, updated_at: string }) =>
           new Chat(conversation.id, conversation.title, [], new Date(conversation.created_at), false)
         );

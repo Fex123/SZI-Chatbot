@@ -57,7 +57,6 @@ body {
 
 .dark-mode-svg .dark-mode-path {
   fill: #000000;
-  /* Default color */
 }
 
 .container.dark .dark-mode-svg .dark-mode-path,
@@ -582,7 +581,6 @@ svg {
   background-color: #333;
 }
 
-/* TODO: Doesnt work */
 .sidebar-date-title {
   padding-left: 8px;
   margin-top: 40px;
@@ -630,7 +628,6 @@ svg {
   }
 }
 
-/* Login Main */
 .login-container {
   display: flex;
   flex-direction: column;

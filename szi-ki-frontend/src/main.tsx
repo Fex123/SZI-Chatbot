@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { HashRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import './index.css';
 import Login from './LoginApp';
-import App from './App'; // Your main app component
+import App from './App';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
