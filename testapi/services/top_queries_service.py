@@ -2,6 +2,8 @@ import requests
 from datetime import datetime, timedelta
 from db_connections import DatabaseConnections
 from config import Config
+import json
+import threading
 
 """
 TopQueriesService class
@@ -18,12 +20,15 @@ class TopQueriesService:
             "Welche Kapitel muss meine Projektarbeit enthalten",
             "Wie viele Credits bekomme ich für meine Bachelorarbeit?"
         ]
+        self.is_updating = False
 
     def get_recent_conversations(self, limit=100):
         """Get recent messages from all users"""
         try:
             pipeline = [
+                {"$match": {"messages": {"$exists": True, "$ne": []}}},
                 {"$unwind": "$messages"},
+                {"$match": {"messages.role": "user"}},
                 {"$sort": {"messages.timestamp": -1}},
                 {"$limit": limit},
                 {"$group": {
@@ -50,11 +55,21 @@ class TopQueriesService:
 
     def analyze_conversations_with_dify(self, conversations):
         """Send conversations to Dify for analysis"""
+        if not conversations:
+            print("No conversations to analyze")
+            return self.default_queries
+        
+        # Format conversations for analysis
         conversation_text = "\n".join([
             f"{msg['role']}: {msg['content']}" 
-            for msg in conversations
+            for msg in conversations if 'content' in msg and msg['content']
         ])
 
+        if not conversation_text.strip():
+            print("Empty conversation text")
+            return self.default_queries
+
+        # Prepare prompt for Dify
         prompt = (
             "Based on these conversation snippets, identify the top 3 most common "
             "or important topics/queries. Format your response as a JSON array of "
@@ -69,54 +84,125 @@ class TopQueriesService:
             "user": "system"
         }
 
-        response = requests.post(
-            f"{Config.DIFY_URL}/chat-messages",
-            headers=Config.DIFY_HEADERS,
-            json=payload
-        )
+        try:
+            print("Sending request to Dify for conversation analysis...")
+            response = requests.post(
+                f"{Config.DIFY_URL}/chat-messages",
+                headers=Config.DIFY_HEADERS,
+                json=payload,
+                timeout=30  # Add timeout to prevent long-running requests
+            )
 
-        if response.status_code != 200:
-            raise Exception(f"Dify API error: {response.status_code}")
+            if response.status_code != 200:
+                print(f"Dify API error: {response.status_code}")
+                return self.default_queries
 
-        return response.json().get("answer", "[]")
+            answer = response.json().get("answer", "[]")
+            
+            # Try to parse the JSON response
+            try:
+                queries = json.loads(answer)
+                if isinstance(queries, list) and len(queries) > 0:
+                    return queries[:3]  # Ensure we return at most 3 queries
+                else:
+                    print(f"Invalid response format: {answer}")
+                    return self.default_queries
+            except json.JSONDecodeError:
+                print(f"Failed to decode response as JSON: {answer}")
+                return self.default_queries
+                
+        except requests.exceptions.Timeout:
+            print("Dify request timed out")
+            return self.default_queries
+        except requests.exceptions.RequestException as e:
+            print(f"Request error: {e}")
+            return self.default_queries
+        except Exception as e:
+            print(f"Unexpected error in analyze_conversations_with_dify: {e}")
+            return self.default_queries
 
     def save_top_queries(self, queries):
         """Save analyzed queries to database"""
-        doc = {
-            "queries": queries,
-            "created_at": datetime.now()
-        }
-        self.top_queries_collection.insert_one(doc)
+        try:
+            doc = {
+                "queries": queries,
+                "created_at": datetime.now()
+            }
+            self.top_queries_collection.insert_one(doc)
+            print(f"Saved top queries: {queries}")
+            return True
+        except Exception as e:
+            print(f"Error saving top queries: {e}")
+            return False
 
     def get_latest_top_queries(self):
         """Get most recent top queries or defaults if none exist"""
-        result = self.top_queries_collection.find_one(
-            sort=[("created_at", -1)]
-        )
-        return result["queries"] if result else self.default_queries
+        try:
+            result = self.top_queries_collection.find_one(
+                sort=[("created_at", -1)]
+            )
+            if result and "queries" in result:
+                return result["queries"]
+            return self.default_queries
+        except Exception as e:
+            print(f"Error getting latest top queries: {e}")
+            return self.default_queries
 
     def should_update_queries(self):
         """Check if queries should be updated based on configured interval"""
-        latest = self.top_queries_collection.find_one(
-            sort=[("created_at", -1)]
-        )
-        if not latest:
-            return True
+        try:
+            latest = self.top_queries_collection.find_one(
+                sort=[("created_at", -1)]
+            )
+            if not latest:
+                return True
 
-        next_update = latest["created_at"] + self.update_interval
-        return datetime.now() >= next_update
+            next_update = latest["created_at"] + self.update_interval
+            return datetime.now() >= next_update
+        except Exception as e:
+            print(f"Error checking if queries should be updated: {e}")
+            return False
+
+    def _async_update_queries(self, conversations):
+        """Background task to update queries"""
+        try:
+            self.is_updating = True
+            analyzed_queries = self.analyze_conversations_with_dify(conversations)
+            self.save_top_queries(analyzed_queries)
+        except Exception as e:
+            print(f"Error in async update: {e}")
+        finally:
+            self.is_updating = False
 
     def update_top_queries(self):
         """Main method to update top queries with empty check"""
-        if not self.should_update_queries():
-            return False
+        try:
+            # Skip if already updating
+            if self.is_updating:
+                print("Update already in progress, skipping")
+                return False
+                
+            # Skip if update not needed
+            if not self.should_update_queries():
+                return False
 
-        conversations = self.get_recent_conversations()
-        if not conversations:
-            # Save default queries if no conversations exist
-            self.save_top_queries(self.default_queries)
+            conversations = self.get_recent_conversations()
+            if not conversations:
+                # Save default queries if no conversations exist
+                self.save_top_queries(self.default_queries)
+                return True
+
+            # Start background thread to update queries
+            thread = threading.Thread(
+                target=self._async_update_queries,
+                args=(conversations,)
+            )
+            thread.daemon = True
+            thread.start()
+            
+            print("Started background update of top queries")
             return True
-
-        analyzed_queries = self.analyze_conversations_with_dify(conversations)
-        self.save_top_queries(analyzed_queries)
-        return True
+            
+        except Exception as e:
+            print(f"Error initiating top queries update: {e}")
+            return False
