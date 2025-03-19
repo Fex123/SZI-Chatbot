@@ -14,8 +14,7 @@ from services.user_service import UserService
 from services.top_queries_service import TopQueriesService
 
 app = Flask(__name__)
-# TODO: man kann sowas implementieren: CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Initialize Bcrypt singleton with app FIRST
 bcrypt_singleton = BcryptSingleton.get_instance()
@@ -26,19 +25,37 @@ auth = HTTPTokenAuth(scheme='Bearer')
 token_manager = TokenManager()
 
 # Initialize database connection
-db_conn = DatabaseConnections()
-db_conn.connect_all()
+db_conn = None
+user_service = None
+message_controller = None
+auth_controller = None
+top_queries_service = None
 
-# Initialize rest of services AFTER bcrypt and database are ready
-user_service = UserService()
-message_controller = MessageController()
-auth_controller = AuthController()
-top_queries_service = TopQueriesService(update_interval_days=7)  # Top Queries set to weekly updates
+# Services initialization function
+def initialize_services():
+    global db_conn, user_service, message_controller, auth_controller, top_queries_service
+    
+    # Initialize database connection
+    db_conn = DatabaseConnections()
+    db_conn.connect_all()
+    
+    # Now initialize services that depend on DB
+    user_service = UserService()
+    message_controller = MessageController()
+    auth_controller = AuthController()
+    top_queries_service = TopQueriesService(update_interval_days=7)
+
+# Centralized initialization middleware
+@app.before_request
+def ensure_services_initialized():
+    if db_conn is None:
+        initialize_services()
 
 @auth.verify_token
 def verify_token(token):
     return auth_controller.verify_auth_token(token, token_manager)
 
+# Routes without redundant initialization checks
 """
 Root endpoint
 GET /
@@ -316,4 +333,5 @@ def get_top_queries():
 
 
 if __name__ == '__main__':
-    app.run(host= "0.0.0.0", port= 3104, debug=Config.DEBUG, threaded=True)
+    initialize_services()
+    app.run(host="0.0.0.0", port=3104, debug=Config.DEBUG, threaded=True)
