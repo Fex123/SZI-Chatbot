@@ -221,8 +221,6 @@ Response:
     ]
 }
 
-Example curl:
-curl "http://localhost:5000/api/conversations?user_id=dev_user"
 """
 @app.route('/api/conversations', methods=['GET'])
 @auth.login_required
