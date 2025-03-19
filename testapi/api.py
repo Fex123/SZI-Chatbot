@@ -43,7 +43,7 @@ def initialize_services():
     user_service = UserService()
     message_controller = MessageController()
     auth_controller = AuthController()
-    top_queries_service = TopQueriesService(update_interval_days=7)
+    top_queries_service = TopQueriesService(update_interval_minutes=Config.TOP_QUERIES_UPDATE_INTERVAL)
 
 # Centralized initialization middleware
 @app.before_request

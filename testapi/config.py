@@ -13,3 +13,4 @@ class Config:
         'Authorization': f'Bearer {DIFY_API_KEY}',
         'Content-Type': 'application/json'
     }
+    TOP_QUERIES_UPDATE_INTERVAL = 3  # minutes

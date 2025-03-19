@@ -12,7 +12,7 @@ class TopQueriesService:
         db = DatabaseConnections().get_mongodb()
         self.messages_collection = db.messages
         self.top_queries_collection = db.top_queries
-        self.update_interval = timedelta(days=update_interval_minutes)
+        self.update_interval = timedelta(minutes=update_interval_minutes)
         self.default_queries = [
             "Wieviele Seiten braucht meine 2. Projektarbeit",
             "Welche Kapitel muss meine Projektarbeit enthalten",
