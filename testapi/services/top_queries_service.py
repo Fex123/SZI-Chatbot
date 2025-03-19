@@ -4,6 +4,7 @@ from db_connections import DatabaseConnections
 from config import Config
 import json
 import threading
+import re
 
 """
 TopQueriesService class
@@ -72,9 +73,9 @@ class TopQueriesService:
         # Prepare prompt for Dify
         prompt = (
             "Based on these conversation snippets, identify the top 3 most common "
-            "or important topics/queries. Format your response as a JSON array of "
-            "exactly 3 strings. Example: ['topic1', 'topic2', 'topic3']. Here are "
-            f"the conversations:\n\n{conversation_text}"
+            "or important topics/queries. Return ONLY a JSON array of exactly 3 strings, "
+            "with no explanation or other text. Example response: [\"topic1\", \"topic2\", \"topic3\"]"
+            f"\n\nThe conversations:\n\n{conversation_text}"
         )
 
         payload = {
@@ -90,7 +91,7 @@ class TopQueriesService:
                 f"{Config.DIFY_URL}/chat-messages",
                 headers=Config.DIFY_HEADERS,
                 json=payload,
-                timeout=30  # Add timeout to prevent long-running requests
+                timeout=30
             )
 
             if response.status_code != 200:
@@ -98,18 +99,48 @@ class TopQueriesService:
                 return self.default_queries
 
             answer = response.json().get("answer", "[]")
+            print(f"Raw response from Dify: {answer}")
             
-            # Try to parse the JSON response
+            # Extract JSON array from the text using regex
+            json_array_pattern = r'\[.*?\]'
+            json_matches = re.search(json_array_pattern, answer, re.DOTALL)
+            
+            if json_matches:
+                json_str = json_matches.group(0)
+                print(f"Extracted JSON string: {json_str}")
+                
+                # Try to parse the extracted JSON
+                try:
+                    queries = json.loads(json_str)
+                    if isinstance(queries, list) and len(queries) > 0:
+                        print(f"Successfully parsed queries: {queries}")
+                        return queries[:3]  # Ensure we return at most 3 queries
+                    else:
+                        print(f"Invalid parsed format (not a non-empty list): {queries}")
+                except json.JSONDecodeError as e:
+                    print(f"JSON decode error after extraction: {e}")
+            else:
+                print("Could not extract JSON array from response")
+            
+            # Fallback: Try direct JSON parsing in case it's a clean JSON string
             try:
                 queries = json.loads(answer)
                 if isinstance(queries, list) and len(queries) > 0:
-                    return queries[:3]  # Ensure we return at most 3 queries
+                    print(f"Successfully parsed direct JSON: {queries}")
+                    return queries[:3]
                 else:
-                    print(f"Invalid response format: {answer}")
-                    return self.default_queries
-            except json.JSONDecodeError:
-                print(f"Failed to decode response as JSON: {answer}")
-                return self.default_queries
+                    print(f"Invalid direct parse format: {queries}")
+            except json.JSONDecodeError as e:
+                print(f"Direct JSON decode error: {e}")
+            
+            # Second fallback: Manual extraction of strings
+            if '"' in answer or "'" in answer:
+                quoted_strings = re.findall(r'["\'](.*?)["\']', answer)
+                if quoted_strings and len(quoted_strings) >= 3:
+                    print(f"Extracted quoted strings: {quoted_strings[:3]}")
+                    return quoted_strings[:3]
+                    
+            return self.default_queries
                 
         except requests.exceptions.Timeout:
             print("Dify request timed out")
