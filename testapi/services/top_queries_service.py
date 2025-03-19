@@ -8,11 +8,11 @@ TopQueriesService class
 Responsible for handling operations related to top queries analysis
 """
 class TopQueriesService:
-    def __init__(self, update_interval_days):
+    def __init__(self, update_interval_minutes):
         db = DatabaseConnections().get_mongodb()
         self.messages_collection = db.messages
         self.top_queries_collection = db.top_queries
-        self.update_interval = timedelta(days=update_interval_days)
+        self.update_interval = timedelta(days=update_interval_minutes)
         self.default_queries = [
             "Wieviele Seiten braucht meine 2. Projektarbeit",
             "Welche Kapitel muss meine Projektarbeit enthalten",

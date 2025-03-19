@@ -31,6 +31,7 @@ message_controller = None
 auth_controller = None
 top_queries_service = None
 
+<<<<<<< Updated upstream
 # Services initialization function
 def initialize_services():
     global db_conn, user_service, message_controller, auth_controller, top_queries_service
@@ -50,6 +51,13 @@ def initialize_services():
 def ensure_services_initialized():
     if db_conn is None:
         initialize_services()
+=======
+# Initialize rest of services AFTER bcrypt and database are ready
+user_service = UserService()
+message_controller = MessageController()
+auth_controller = AuthController()
+top_queries_service = TopQueriesService(update_interval_minutes=5)  # Top Queries set to 5-minute updates
+>>>>>>> Stashed changes
 
 @auth.verify_token
 def verify_token(token):
