@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Chat, fetchConversationMessages, sendMessage } from './helper';
+import { Chat, fetchConversationMessages, sendMessage, fetchTopQueries } from './helper';
 import './App.css';
 import DarkModeToggle from './Dmtoggle';
 import ProfilePic from './UserProfile';
@@ -35,6 +35,8 @@ interface ChatState {
   isError: boolean;
   errorMessage: string | null;
   lastMessage: string;
+  topQueries: string[];
+  topQueriesError: string | null;
 }
 
 class ChatComp extends Component<ChatProps, ChatState> {
@@ -49,7 +51,19 @@ class ChatComp extends Component<ChatProps, ChatState> {
       isError: false,
       errorMessage: null,
       lastMessage: "",
+      topQueries: [],
+      topQueriesError: null,
     };
+  }
+
+  async componentDidMount() {
+    try {
+      const data = await fetchTopQueries();
+      this.setState({ topQueries: data.queries });
+    } catch (error) {
+      console.error('Error fetching top queries:', error);
+      this.setState({ topQueriesError: 'Failed to fetch top queries. ' + error });
+    }
   }
 
   componentDidUpdate(prevProps: ChatProps) {
@@ -66,8 +80,9 @@ class ChatComp extends Component<ChatProps, ChatState> {
       this.setState({});
     } catch (error) {
       console.error('Error fetching messages:', error);
-    }
 
+      this.setState({ errorMessage: 'Die Nachrichten dieses Chats konnten nicht geladen Werden. Bitte Lade die Seite neu. ', isError: true });
+    }
   };
 
   handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -147,7 +162,7 @@ class ChatComp extends Component<ChatProps, ChatState> {
 
   render() {
     const { chat } = this.props;
-    const { inputText, isLoading, isError, errorMessage, lastMessage } = this.state;
+    const { inputText, isLoading, isError, errorMessage, lastMessage, topQueries, topQueriesError } = this.state;
 
     return (
       <div className="content">
@@ -190,9 +205,15 @@ class ChatComp extends Component<ChatProps, ChatState> {
                   <div className="intro-text faq-style"> <br />Häufig gestellte Fragen:</div>
                 </div>
                 <div className="example-questions">
-                  <div className="question-panel" onClick={() => this.handleInputButtonClick("Wie viele Seiten braucht meine 2. Projektarbeit?")}>Wie viele Seiten braucht meine 2. Projektarbeit?</div>
-                  <div className="question-panel" onClick={() => this.handleInputButtonClick("Welche Kapitel muss meine Projektarbeit enthalten?")}>Welche Kapitel muss meine Projektarbeit enthalten?</div>
-                  <div className="question-panel" onClick={() => this.handleInputButtonClick("Wie viele Credits bekomme ich für meine Bachelorarbeit?")}>Wie viele Credits bekomme ich für meine Bachelorarbeit?</div>
+                  {topQueriesError ? (
+                    <div className="error-message">
+                      <div>{topQueriesError}</div>
+                    </div>
+                  ) : (
+                    topQueries.map((query, index) => (
+                      <div className="question-panel" key={index} onClick={() => this.handleInputButtonClick(query)}>{query}</div>
+                    ))
+                  )}
                 </div>
               </div>
             )}

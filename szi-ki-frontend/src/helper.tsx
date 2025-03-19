@@ -125,6 +125,25 @@ export const logoutUser = async () => {
   return data;
 };
 
+export const fetchTopQueries = async () => {
+  const token = sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312') ? JSON.parse(sessionStorage.getItem('loginResponse-plaiooijdjfpakij103978128739807298312')!).token : null;
+  const response = await fetch(`${API_URL}/api/top-queries`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to fetch top queries');
+  }
+
+  const data = await response.json();
+  return data;
+}
+
 export class Chat {
   private _messages: string[];
   title: string;
