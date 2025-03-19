@@ -12,10 +12,10 @@ from models.request_models import SendMessageRequest, UserCreateRequest, LoginRe
 from models.response_models import ConversationResponse, MessageResponse, UserResponse
 from services.user_service import UserService
 from services.top_queries_service import TopQueriesService
+from datetime import datetime
 
 app = Flask(__name__)
-# TODO: man kann sowas implementieren: CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Initialize Bcrypt singleton with app FIRST
 bcrypt_singleton = BcryptSingleton.get_instance()
@@ -26,19 +26,37 @@ auth = HTTPTokenAuth(scheme='Bearer')
 token_manager = TokenManager()
 
 # Initialize database connection
-db_conn = DatabaseConnections()
-db_conn.connect_all()
+db_conn = None
+user_service = None
+message_controller = None
+auth_controller = None
+top_queries_service = None
 
-# Initialize rest of services AFTER bcrypt and database are ready
-user_service = UserService()
-message_controller = MessageController()
-auth_controller = AuthController()
-top_queries_service = TopQueriesService(update_interval_days=7)  # Top Queries set to weekly updates
+# Services initialization function
+def initialize_services():
+    global db_conn, user_service, message_controller, auth_controller, top_queries_service
+    
+    # Initialize database connection
+    db_conn = DatabaseConnections()
+    db_conn.connect_all()
+    
+    # Now initialize services that depend on DB
+    user_service = UserService()
+    message_controller = MessageController()
+    auth_controller = AuthController()
+    top_queries_service = TopQueriesService(update_interval_minutes=Config.TOP_QUERIES_UPDATE_INTERVAL)
+
+# Centralized initialization middleware
+@app.before_request
+def ensure_services_initialized():
+    if db_conn is None:
+        initialize_services()
 
 @auth.verify_token
 def verify_token(token):
     return auth_controller.verify_auth_token(token, token_manager)
 
+# Routes without redundant initialization checks
 """
 Root endpoint
 GET /
@@ -151,10 +169,6 @@ Response:
     "response": "Hello! I'm doing well, thank you for asking. How can I help you today?"
 }
 
-Example curl:
-curl -X POST http://localhost:5000/api/chat/send \
-    -H "Content-Type: application/json" \
-    -d '{"query": "Hello, how are you?", "conversation_id": "507f1f77bcf86cd799439011"}'
 """
 @app.route('/api/chat/send', methods=['POST'])
 @auth.login_required
@@ -221,8 +235,6 @@ Response:
     ]
 }
 
-Example curl:
-curl "http://localhost:5000/api/conversations?user_id=dev_user"
 """
 @app.route('/api/conversations', methods=['GET'])
 @auth.login_required
@@ -268,8 +280,6 @@ Response:
     ]
 }
 
-Example curl:
-curl "http://localhost:5000/api/conversations/507f1f77bcf86cd799439011/messages?user_id=dev_user"
 """
 @app.route('/api/conversations/<conversation_id>/messages', methods=['GET'])
 @auth.login_required
@@ -305,23 +315,41 @@ GET /api/top-queries
 Response:
 {
     "queries": ["query1", "query2", "query3"],
-    "last_updated": "2024-02-21T15:30:00.000Z"
+    "last_updated": "2024-02-21T15:30:00.000Z",
+    "update_in_progress": false
 }
 """
 @app.route('/api/top-queries', methods=['GET'])
 def get_top_queries():
     try:
-        # Try to update if needed (daily check)
-        top_queries_service.update_top_queries()
+        # Try to schedule an update if needed (will happen in background)
+        update_scheduled = top_queries_service.update_top_queries()
         
-        # Get latest queries
+        # Always return immediately with latest queries
         queries = top_queries_service.get_latest_top_queries()
+        
+        # Get the last updated timestamp
+        last_doc = DatabaseConnections().get_mongodb().top_queries.find_one(
+            sort=[("created_at", -1)]
+        )
+        last_updated = last_doc["created_at"] if last_doc else datetime.now()
+        
         return jsonify({
-            'queries': queries
+            'queries': queries,
+            'last_updated': last_updated.isoformat(),
+            'update_in_progress': top_queries_service.is_updating,
+            'update_scheduled': update_scheduled
         }), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Error in get_top_queries: {e}")
+        # Return default queries in case of any error
+        return jsonify({
+            'queries': top_queries_service.default_queries,
+            'error': str(e),
+            'update_in_progress': top_queries_service.is_updating
+        }), 200  # Still return 200 to not break the frontend
 
 
 if __name__ == '__main__':
-    app.run(host= "0.0.0.0", port= 3104, debug=Config.DEBUG, threaded=True)
+    initialize_services()
+    app.run(host="0.0.0.0", port=3104, debug=Config.DEBUG, threaded=True)

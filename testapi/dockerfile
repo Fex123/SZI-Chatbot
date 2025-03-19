@@ -4,4 +4,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-CMD ["sh", "-c", "python create_collections.py && gunicorn --bind 0.0.0.0:3104 --workers 4 api:app"]
+
+# Enable unbuffered output to see all logs properly
+ENV PYTHONUNBUFFERED=1
+
+# Execute create_collections.py first, then start gunicorn with config
+CMD ["sh", "-c", "python create_collections.py && gunicorn --bind 0.0.0.0:3104 --workers 4 --config gunicorn_config.py api:app"]

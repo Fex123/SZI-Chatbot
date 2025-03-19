@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 import time
 from config import Config
+import os
 
 class DatabaseConnections:
     _instance = None
@@ -18,10 +19,18 @@ class DatabaseConnections:
             self.mongodb_client = None
             self.db = None
             self._is_initialized = True
+            self._worker_pid = os.getpid()  # Store the worker PID
 
     def connect_all(self):
-        if self._is_connected:
+        # Skip reconnect if we're already connected in this worker
+        if self._is_connected and self._worker_pid == os.getpid():
             return self.db
+
+        # Reset connection status for new workers
+        if self._worker_pid != os.getpid():
+            self._is_connected = False
+            self._worker_pid = os.getpid()
+            print(f"Worker {os.getpid()} initializing new database connection")
 
         max_retries = 5
         retry_delay = 3
@@ -57,6 +66,11 @@ class DatabaseConnections:
                     )
                 
                 print("MongoDB connection established successfully!")
+                
+                conversation_count = self.db.messages.count_documents({})
+                if conversation_count == 0:
+                    print("No conversations found in database")
+                    
                 self._is_connected = True
                 return self.db
                 
@@ -71,6 +85,7 @@ class DatabaseConnections:
                 print(f"Retrying in {retry_delay} seconds...")
                 time.sleep(retry_delay)
             else:
+                print(f"Failed to connect after {max_retries} attempts")
                 raise Exception(f"Failed to connect after {max_retries} attempts")
 
     def close_all(self):
