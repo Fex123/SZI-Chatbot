@@ -70,11 +70,14 @@ class TopQueriesService:
             print("Empty conversation text")
             return self.default_queries
 
+
         # Prepare prompt for Dify
         prompt = (
             "Based on these conversation snippets, identify the top 3 most common "
-            "or important topics/queries. Return ONLY a JSON array of exactly 3 strings, "
-            "with no explanation or other text. Example response: [\"topic1\", \"topic2\", \"topic3\"]"
+            "or important topics/queries and phrase them as questions in natural language. "
+            "Put a question mark at the end if it's a question. "
+            "Return ONLY a JSON array of exactly 3 strings, "
+            "with no explanation or other text. Example response: [\"topic question 1\", \"topic question 2\", \"topic question 3\"]"
             f"\n\nThe conversations:\n\n{conversation_text}"
         )
 
@@ -91,7 +94,7 @@ class TopQueriesService:
                 f"{Config.DIFY_URL}/chat-messages",
                 headers=Config.DIFY_HEADERS,
                 json=payload,
-                timeout=30
+                timeout=90 # Timeout after 90 seconds if Dify doesn't respond
             )
 
             if response.status_code != 200:
