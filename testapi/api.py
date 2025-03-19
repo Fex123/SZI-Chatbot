@@ -151,10 +151,6 @@ Response:
     "response": "Hello! I'm doing well, thank you for asking. How can I help you today?"
 }
 
-Example curl:
-curl -X POST http://localhost:5000/api/chat/send \
-    -H "Content-Type: application/json" \
-    -d '{"query": "Hello, how are you?", "conversation_id": "507f1f77bcf86cd799439011"}'
 """
 @app.route('/api/chat/send', methods=['POST'])
 @auth.login_required
@@ -266,8 +262,6 @@ Response:
     ]
 }
 
-Example curl:
-curl "http://localhost:5000/api/conversations/507f1f77bcf86cd799439011/messages?user_id=dev_user"
 """
 @app.route('/api/conversations/<conversation_id>/messages', methods=['GET'])
 @auth.login_required
