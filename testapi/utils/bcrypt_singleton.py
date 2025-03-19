@@ -1,5 +1,8 @@
 from flask_bcrypt import Bcrypt
 
+"""
+Singleton class for Bcrypt instance
+"""
 class BcryptSingleton:
     _instance = None
     bcrypt = None

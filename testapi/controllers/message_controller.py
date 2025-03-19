@@ -13,6 +13,7 @@ class MessageController:
         self.user_service = UserService()
 
     def send_message_to_dify(self, query, conversation_id, user_id):
+        """Send a message to Dify API for processing"""
         if not user_id:
             raise ValueError("Authenticated user is required")
             
@@ -50,7 +51,6 @@ class MessageController:
             new_conversation_id = response_data.get("conversation_id")
             ai_response = response_data.get("answer", "No response received.")
 
-            # Use existing conversation_id if available, otherwise use new one
             final_conversation_id = conversation_id or new_conversation_id
 
             if final_conversation_id and ai_response:
@@ -62,7 +62,6 @@ class MessageController:
                     user_id
                 )
                 
-                # Always try to add conversation to user's list
                 self.user_service.add_conversation(user_id, final_conversation_id)
 
             return {
@@ -75,6 +74,7 @@ class MessageController:
             raise Exception(f"Failed to communicate with Dify API: {str(e)}")
 
     def create_new_chat(self, user_id, title=None):
+        """Create a new chat conversation"""
         if not user_id:
             raise ValueError("Authenticated user is required")
             
@@ -88,6 +88,7 @@ class MessageController:
         return conversation
 
     def get_user_chat_history(self, conversation_id, user_id):
+        """Get chat history for a user"""
         # Get chat history from Dify API
         response = requests.get(
             f"{Config.DIFY_URL}/messages",
@@ -101,6 +102,7 @@ class MessageController:
         return response.json()
 
     def get_user_conversations(self, user_id):
+        """Get user conversations from Dify API and local database"""
         # Get conversations from Dify API
         response = requests.get(
             f"{Config.DIFY_URL}/conversations",

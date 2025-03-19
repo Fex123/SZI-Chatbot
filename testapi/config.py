@@ -3,6 +3,9 @@ import os
 
 load_dotenv("../.env")
 
+"""
+Configuration settings for the Flask app
+"""
 class Config:
     DEBUG = False
     MONGO_URI = "mongodb://root:example@mongo:27017/"

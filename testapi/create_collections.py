@@ -1,7 +1,10 @@
 from pymongo import MongoClient, ASCENDING
 from config import Config
 
+# Function to initialize MongoDB collections with schema validation and indexes
+# This function will be called when the script is run
 def init_mongodb_collections():
+    """Initialize MongoDB collections with schema validation and indexes"""
     client = MongoClient(Config.MONGO_URI)
     db = client[Config.MONGO_DB_NAME]
     

@@ -2,6 +2,10 @@ import secrets
 from datetime import datetime, timedelta
 from db_connections import DatabaseConnections
 
+"""
+TokenManager class
+Responsible for managing user tokens in MongoDB
+"""
 class TokenManager:
     def __init__(self):
         db = DatabaseConnections().get_mongodb()

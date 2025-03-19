@@ -52,11 +52,11 @@ def ensure_services_initialized():
     if db_conn is None:
         initialize_services()
 
+# Token verification for routes where required
 @auth.verify_token
 def verify_token(token):
     return auth_controller.verify_auth_token(token, token_manager)
 
-# Routes without redundant initialization checks
 """
 Root endpoint
 GET /
@@ -351,5 +351,7 @@ def get_top_queries():
 
 
 if __name__ == '__main__':
+    # Initialize services before running the app
     initialize_services()
+    # Run the app with custom host and port
     app.run(host="0.0.0.0", port=3104, debug=Config.DEBUG, threaded=True)

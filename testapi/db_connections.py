@@ -4,6 +4,9 @@ import time
 from config import Config
 import os
 
+"""
+Singleton class for managing MongoDB connections
+"""
 class DatabaseConnections:
     _instance = None
     _is_initialized = False
@@ -22,6 +25,7 @@ class DatabaseConnections:
             self._worker_pid = os.getpid()  # Store the worker PID
 
     def connect_all(self):
+        """Connect to MongoDB and return the database object"""
         # Skip reconnect if we're already connected in this worker
         if self._is_connected and self._worker_pid == os.getpid():
             return self.db
@@ -89,6 +93,7 @@ class DatabaseConnections:
                 raise Exception(f"Failed to connect after {max_retries} attempts")
 
     def close_all(self):
+        """Close MongoDB connection"""
         if self.mongodb_client is not None:
             self.mongodb_client.close()
             self.mongodb_client = None
@@ -96,6 +101,7 @@ class DatabaseConnections:
             self._is_connected = False
 
     def get_mongodb(self):
+        """Get MongoDB database object"""
         if not self._is_connected or self.mongodb_client is None:
             return self.connect_all()
         return self.db

@@ -12,6 +12,7 @@ class MessageService:
         self.messages_collection = db.messages
 
     def save_message(self, conversation_id, user_message, ai_response, user_id):
+        """Save a new message in a conversation"""
         # Validate user_id is provided
         if not user_id:
             raise ValueError("user_id is required")
@@ -49,13 +50,14 @@ class MessageService:
         return conversation_id
 
     def load_message(self, conversation_id):
+        """Load a conversation by ID"""
         return self.messages_collection.find_one({'conversation_id': conversation_id})
 
     def get_conversation_history(self, conversation_id, user_id=None):
         """Get conversation history with optional user validation"""
         query = {'conversation_id': conversation_id}
         if user_id:
-            query['user_id'] = user_id  # User check if user_id provided
+            query['user_id'] = user_id
             
         conversation = self.messages_collection.find_one(
             query,
@@ -91,6 +93,7 @@ class MessageService:
             counter += 1
 
     def create_conversation(self, user_id, title=None):
+        """Create a new conversation for a user"""
         conversation_id = str(ObjectId())
         now = datetime.now()
         
@@ -125,6 +128,7 @@ class MessageService:
         ).sort('created_at', -1)
 
     def update_conversation_title(self, conversation_id, new_title):
+        """Update the title of a conversation"""
         return self.messages_collection.update_one(
             {'conversation_id': conversation_id},
             {'$set': {'title': new_title, 'updated_at': datetime.now()}}

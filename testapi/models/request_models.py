@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from typing import Optional
 from services.validation_service import ValidationService
 
+"""
+Module for Pydantic models for API request data
+"""
 class SendMessageRequest(BaseModel):
     query: str
     conversation_id: Optional[str] = None

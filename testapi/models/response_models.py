@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
+"""
+Module for Pydantic models for API response data
+"""
 class ConversationResponse(BaseModel):
     id: str
     title: str
