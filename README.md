@@ -1,3 +1,16 @@
+# SZI-Chatbot
+
+Im Rahmen einer umfassenden Studienarbeit mit einer Bearbeitungszeit von sechs Monaten wurde dieses Projekt an der DHBW-Lörrach im Studiengang Informatik durchgeführt.
+Das Ziel bestand darin, einen KI-Chatbot zu entwickeln, der dazu in der Lage ist, Fragen über das Studienzentrum Informatik und insbesondere zu den Richtlinien für wissenschaftliches Arbeiten zu beantworten.
+Die Realisierung des Chatbots sollte mit einem LLM erfolgen, der on-Premise auf den Systemen der DHBW implementiert wird (ohne den Einsatz von KI-APIs).
+
+Das Endprodukt besteht aus 3 wesentlichen Komponenten:
+1. Einem React Frontend, mit modernen Design und der visuellen Identität der DHBW.
+2. Einem Flask Backend, zur Verwaltung der Chats, Anfragen und Nutzer
+3. Einem KI-Backend uner Verwendung des Open-Source Tools Dify.
+
+Das Endresultat ist eine moderne Webanwendung, welche spezifische Fragen zu den Richtlinien beantworten und verständlich darstellen kann.
+
 # Anleitung
 ## Projekt aufsetzen
 1. Erstellen Sie zunächst einen Ordner, indem das Projekt aufgebaut wird
