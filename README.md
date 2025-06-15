@@ -7,7 +7,7 @@ Die Realisierung des Chatbots sollte mit einem LLM erfolgen, der on-Premise auf 
 Das Endprodukt besteht aus 3 wesentlichen Komponenten:
 1. Einem React Frontend, mit modernen Design und der visuellen Identität der DHBW.
 2. Einem Flask Backend, zur Verwaltung der Chats, Anfragen und Nutzer
-3. Einem KI-Backend uner Verwendung des Open-Source Tools Dify.
+3. Einem KI-Backend uner Verwendung des Open-Source Tools [Dify](https://github.com/langgenius/dify).
 
 Das Endresultat ist eine moderne Webanwendung, welche spezifische Fragen zu den Richtlinien beantworten und verständlich darstellen kann.
 
